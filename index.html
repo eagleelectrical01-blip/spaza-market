@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#128C7E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Spaza Market">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/images/icon-192.png">
+<title>Spaza Market</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#111}
+:root{
+  --green:#128C7E;
+  --green-dark:#0a6b5e;
+  --green-light:#E1F5EE;
+  --green-text:#085041;
+  --amber:#BA7517;
+  --amber-light:#FAEEDA;
+  --amber-text:#633806;
+  --red:#A32D2D;
+  --red-light:#FCEBEB;
+  --blue:#185FA5;
+  --blue-light:#E6F1FB;
+  --blue-text:#0C447C;
+  --purple:#534AB7;
+  --purple-light:#EEEDFE;
+  --purple-text:#3C3489;
+  --gray:#f0f2f5;
+  --border:#e0e0e0;
+  --text:#111;
+  --text-muted:#666;
+  --white:#fff;
+  --radius:10px;
+  --radius-sm:6px;
+}
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--white);display:flex;flex-direction:column;position:relative}
+.topbar{background:var(--green);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:100}
+.tb-brand{display:flex;align-items:center;gap:9px}
+.tb-logo{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px}
+.tb-name{color:#fff;font-size:15px;font-weight:600;letter-spacing:-0.3px}
+.tb-sub{color:rgba(255,255,255,0.75);font-size:10px;margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:5px}
+.role-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:11px;padding:5px 9px;border-radius:20px;cursor:pointer;position:relative;transition:background 0.15s}
+.role-btn.active{background:rgba(255,255,255,0.35);font-weight:600}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:#EF9F27;color:#fff;font-size:9px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:1.5px solid var(--green)}
+.nav{display:flex;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav-tab{flex:1;min-width:fit-content;padding:10px 12px;text-align:center;font-size:11px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color 0.15s}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+.view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.filter-bar{padding:8px 12px;background:#f8f8f8;border-bottom:1px solid var(--border);display:flex;gap:7px;align-items:center;position:sticky;top:0;z-index:10}
+.search-box{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;background:var(--white);outline:none}
+.search-box:focus{border-color:var(--green)}
+.near-btn{background:var(--green);color:#fff;border:none;border-radius:20px;padding:8px 13px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:500;display:flex;align-items:center;gap:4px}
+.near-btn.on{background:#3B6D11}
+.info-btn{background:rgba(255,255,255,0.2);border:1.5px solid #fff;color:#fff;border-radius:50%;width:28px;height:28px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.cat-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:#f8f8f8;border-bottom:1px solid var(--border)}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-pill{white-space:nowrap;padding:5px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--text-muted);transition:all 0.15s}
+.cat-pill.active{background:var(--green);color:#fff;border-color:var(--green)}
+.new-banner{background:var(--green-light);padding:8px 14px;font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:6px;border-bottom:1px solid #b2ddd4}
+.listing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px 12px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.1s}
+.card:active{transform:scale(0.98)}
+.card.boosted{border:2px solid var(--amber)}
+.card.verified-card{border:2px solid var(--green)}
+.card-photos{height:90px;background:#f5f5f5;position:relative;overflow:hidden}
+.card-photo-img{width:100%;height:100%;object-fit:cover}
+.card-emoji{height:90px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#f5f5f5}
+.card-tag{position:absolute;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600;top:5px}
+.tag-boost{right:5px;background:var(--amber);color:#fff}
+.tag-verify{left:5px;background:var(--green);color:#fff}
+.tag-new{right:5px;background:var(--red);color:#fff}
+.card-body{padding:7px 8px}
+.card-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.3;margin-bottom:2px}
+.card-loc{font-size:11px;color:var(--text-muted);margin-bottom:3px}
+.card-km{color:var(--green);font-weight:600}
+.card-price{font-size:14px;font-weight:700;color:var(--green)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-top:1px solid #f0f0f0}
+.pay-pill{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:600}
+.pay-cod{background:var(--green-light);color:var(--green-text)}
+.pay-snap{background:var(--blue-light);color:var(--blue-text)}
+.pay-both{background:var(--purple-light);color:var(--purple-text)}
+.wa-btn{background:#25D366;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:6px;cursor:pointer;font-weight:600}
+.empty-state{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:14px}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.section-head{padding:12px 14px 6px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px}
+.form-wrap{padding:10px 12px}
+.field{margin-bottom:12px}
+.field label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--white);outline:none;color:var(--text);transition:border-color 0.15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}
+.field textarea{height:70px;resize:none}
+.pay-opts{display:flex;gap:8px}
+.pay-opt{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center;cursor:pointer;color:var(--text-muted);background:var(--white);transition:all 0.15s;font-weight:500}
+.pay-opt.sel{border-color:var(--green);color:var(--green-text);background:var(--green-light);font-weight:600}
+.photo-upload-area{border:2px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;transition:border-color 0.15s;background:#fafafa}
+.photo-upload-area:hover{border-color:var(--green)}
+.photo-upload-area input{display:none}
+.photo-upload-icon{font-size:24px;margin-bottom:6px}
+.photo-upload-text{font-size:12px;color:var(--text-muted)}
+.photo-preview-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.photo-preview{width:64px;height:64px;border-radius:var(--radius-sm);object-fit:cover;border:1.5px solid var(--border);position:relative}
+.photo-remove{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.photo-thumb-wrap{position:relative;display:inline-block}
+.btn-primary{width:100%;padding:13px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;transition:background 0.15s;font-family:inherit}
+.btn-primary:active{background:var(--green-dark)}
+.btn-secondary{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--white);color:var(--text-muted);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit}
+.boost-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.15s}
+.boost-card:hover{border-color:var(--amber)}
+.boost-card:active{transform:scale(0.98)}
+.boost-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
+.boost-desc{font-size:11px;color:var(--text-muted)}
+.boost-price{font-size:16px;font-weight:700;color:var(--amber);text-align:right}
+.boost-method{font-size:10px;color:var(--text-muted);text-align:right;margin-top:2px}
+.info-box{background:var(--amber-light);border:1px solid #f0c060;border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
+.info-box-title{font-size:13px;font-weight:700;color:var(--amber-text);margin-bottom:6px}
+.info-box-text{font-size:12px;color:var(--amber-text);line-height:1.6}
+.info-box-green{background:var(--green-light);border-color:#9FE1CB}
+.info-box-green .info-box-title,.info-box-green .info-box-text{color:var(--green-text)}
+.my-listing-row{background:var(--white);border-bottom:1px solid #f0f0f0;padding:11px 14px;display:flex;align-items:center;gap:11px}
+.my-l-icon{font-size:22px;flex-shrink:0}
+.my-l-info{flex:1;min-width:0}
+.my-l-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.my-l-meta{font-size:11px;color:var(--text-muted);margin-top:1px}
+.my-l-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.status-pill{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.status-live{background:var(--green-light);color:var(--green-text)}
+.status-boosted{background:var(--amber-light);color:var(--amber-text)}
+.action-btn{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;border:none;font-weight:500;background:#f5f5f5;color:var(--text-muted)}
+.action-btn-red{background:var(--red-light);color:var(--red)}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
+.stat-card{background:#f8f8f8;border-radius:var(--radius);padding:10px;text-align:center}
+.stat-num{font-size:20px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--text-muted);margin-top:2px}
+.notif-card{background:var(--white);border-bottom:1px solid #f0f0f0;padding:12px 14px}
+.notif-card.unread-boost{border-left:4px solid var(--amber)}
+.notif-card.unread-new{border-left:4px solid var(--green)}
+.notif-card.unread-pay{border-left:4px solid var(--blue)}
+.notif-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.notif-title{font-size:13px;font-weight:700;color:var(--text)}
+.notif-time{font-size:10px;color:var(--text-muted);flex-shrink:0;margin-left:8px}
+.notif-body{font-size:12px;color:var(--text-muted);margin-bottom:8px;line-height:1.5}
+.notif-actions{display:flex;gap:7px}
+.notif-btn{font-size:12px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:none;font-weight:600;font-family:inherit}
+.notif-btn-green{background:var(--green);color:#fff}
+.notif-btn-amber{background:var(--amber);color:#fff}
+.notif-btn-gray{background:#f0f0f0;color:var(--text-muted)}
+.notif-done{font-size:11px;color:#3B6D11;font-weight:600}
+.rev-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0}
+.rev-label{font-size:13px;font-weight:600;color:var(--text)}
+.rev-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+.rev-amount{font-size:14px;font-weight:700;color:var(--green);flex-shrink:0}
+.pricing-field{margin-bottom:14px}
+.pricing-field label{font-size:13px;font-weight:600;color:var(--text);display:block;margin-bottom:5px}
+.pricing-field input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-weight:700;color:var(--green);outline:none;font-family:inherit}
+.pricing-field input:focus{border-color:var(--green)}
+.pricing-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
+.qr-area{background:#f8f8f8;border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:12px;border:1px solid var(--border)}
+.qr-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+.qr-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.qr-svg{margin:0 auto 10px}
+.qr-url{font-size:13px;font-weight:700;color:var(--green);margin-bottom:10px}
+.wa-share-btn{width:100%;padding:12px;border:none;border-radius:var(--radius);background:#25D366;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.install-step{font-size:12px;color:var(--text-muted);padding:7px 0;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;line-height:1.4}
+.install-step:last-child{border:none}
+.lang-option{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;transition:background 0.1s}
+.lang-option:active{background:#f8f8f8}
+.lang-option.active-lang{background:var(--green-light)}
+.lang-name{font-size:14px;font-weight:600;color:var(--text)}
+.lang-sample{font-size:11px;color:var(--text-muted);margin-top:1px}
+.lang-tick{font-size:16px;color:var(--green)}
+.how-step{padding:13px 14px;border-bottom:1px solid #f0f0f0}
+.how-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:6px}
+.how-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.how-text{font-size:13px;color:var(--text-muted);line-height:1.5}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:14px}
+.login-wrap{padding:30px 20px}
+.login-logo{font-size:40px;text-align:center;margin-bottom:8px}
+.login-title{font-size:20px;font-weight:700;text-align:center;color:var(--text);margin-bottom:4px}
+.login-sub{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:24px}
+.login-field{margin-bottom:14px}
+.login-field label{font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:5px}
+.login-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:14px;outline:none;font-family:inherit;transition:border-color 0.15s}
+.login-field input:focus{border-color:var(--green)}
+.login-error{background:var(--red-light);color:var(--red);font-size:12px;padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:12px;display:none}
+.near-panel{padding:12px 14px;background:#f8f8f8;border-bottom:1px solid var(--border)}
+.near-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.near-label{font-size:12px;color:var(--text-muted);white-space:nowrap}
+.near-val{font-size:13px;font-weight:700;color:var(--text);min-width:36px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;z-index:300;display:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{display:block;animation:fadeup 0.2s ease}
+@keyframes fadeup{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.limit-wall{background:var(--amber-light);border:2px solid var(--amber);border-radius:var(--radius);padding:16px;margin:16px 12px;text-align:center}
+.limit-wall-icon{font-size:32px;margin-bottom:8px}
+.limit-wall-title{font-size:16px;font-weight:700;color:var(--amber-text);margin-bottom:6px}
+.limit-wall-text{font-size:13px;color:var(--amber-text);margin-bottom:14px;line-height:1.5}
+.all-listing-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f0f0f0}
+.all-l-left{display:flex;align-items:center;gap:10px}
+.all-l-info .name{font-size:13px;font-weight:600;color:var(--text)}
+.all-l-info .meta{font-size:11px;color:var(--text-muted);margin-top:1px}
+.all-l-right{display:flex;align-items:center;gap:7px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-logo">🛒</div>
+      <div>
+        <div class="tb-name" id="tb-name">Spaza Market</div>
+        <div class="tb-sub" id="tb-sub">Buy &amp; sell near you</div>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button class="role-btn active" id="btn-buyer" onclick="setRole('buyer')">Buyer</button>
+      <button class="role-btn" id="btn-seller" onclick="setRole('seller')">Seller</button>
+      <button class="role-btn" id="btn-admin" onclick="handleAdminClick()">
+        🔔 Admin
+        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      </button>
+    </div>
+  </div>
+  <div class="nav" id="nav-bar"></div>
+  <div class="view" id="main-view"></div>
+</div>
+
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal" style="border-radius:16px;margin:20px">
+    <div class="login-wrap" style="padding:0">
+      <div class="login-logo">🔐</div>
+      <div class="login-title" id="login-title">Admin Login</div>
+      <div class="login-sub" id="login-sub">Spaza Market admin access</div>
+      <div class="login-error" id="login-error"></div>
+      <div class="login-field">
+        <label id="lbl-email">Email address</label>
+        <input type="email" id="admin-email" placeholder="eagle.electrical01@gmail.com" autocomplete="email">
+      </div>
+      <div class="login-field">
+        <label id="lbl-pass">Password</label>
+        <input type="password" id="admin-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-primary" onclick="doLogin()" id="login-btn">Login</button>
+      <button class="btn-secondary" onclick="closeAdminModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="howto-modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="modal-title" id="howto-title" style="margin-bottom:0">How to use Spaza Market</div>
+      <button onclick="closeHowTo()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-muted)">✕</button>
+    </div>
+    <div id="howto-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+<script src="/js/translations.js"></script>
+<script src="/js/firebase-config.js"></script>
+<script>
+window.currentLang = localStorage.getItem('spaza_lang') || 'en';
+let role = 'buyer';
+let currentCat = 'All';
+let located = false;
+let userLat = null, userLng = null, radiusKm = 5;
+let selectedPay = 'Cash';
+let selectedPhotos = [];
+let adminLoggedIn = false;
+let allListings = [];
+let allNotifs = [];
+let allPayments = [];
+let pricing = { freeListings: 2, extraListingFee: 30, boost7Price: 20, boost30Price: 50, badgePrice: 99 };
+let sellerPhone = localStorage.getItem('spaza_phone') || '';
+const ADMIN_WA = '0823474794';
+const emojis = { Food:'🍖', Clothes:'👗', Services:'🔧', Electronics:'📱', Furniture:'🛋️', Other:'📦' };
+
+const langMeta = [
+  { code:'en', name:'English', sample:'Hello, welcome to Spaza Market' },
+  { code:'af', name:'Afrikaans', sample:'Hallo, welkom by Spaza Mark' },
+  { code:'zu', name:'isiZulu', sample:'Sawubona, siyakwamukela e-Spaza Market' },
+  { code:'xh', name:'isiXhosa', sample:'Molo, wamkelekile e-Spaza Market' },
+  { code:'st', name:'Sesotho', sample:'Lumela, o amohelehile ho Spaza Market' },
+  { code:'tn', name:'Setswana', sample:'Dumela, o amogelwa mo Spaza Market' },
+  { code:'ts', name:'Xitsonga', sample:'Avuxeni, mu amukeriwa eka Spaza Market' },
+  { code:'nso', name:'Sepedi', sample:'Dumela, o amogelwa go Spaza Market' }
+];
+
+const navTabs = {
+  buyer: ['Browse','Near Me','Language','How to Use'],
+  seller: ['My Listings','Add Listing','Boost','Get App'],
+  admin: ['Notifications','Revenue','All Listings','Pricing']
+};
+
+async function init() {
+  pricing = await getPricing();
+  await loadListings();
+  applyLang();
+  setRole('buyer');
+  updateNotifBadge();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+}
+
+async function loadListings() {
+  try {
+    allListings = await getListings();
+  } catch {
+    allListings = [];
+  }
+}
+
+async function loadNotifs() {
+  try {
+    allNotifs = await getBoostRequests();
+  } catch {
+    allNotifs = [];
+  }
+}
+
+async function loadPayments() {
+  try {
+    allPayments = await getPayments();
+  } catch {
+    allPayments = [];
+  }
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notif-badge');
+  const pending = allNotifs.filter(n => n.status === 'pending').length;
+  if (pending > 0 && adminLoggedIn) {
+    badge.textContent = pending;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function applyLang() {
+  document.getElementById('tb-name').textContent = t('appName');
+  document.getElementById('tb-sub').textContent = t('appSub');
+}
+
+function setRole(r) {
+  role = r;
+  ['buyer','seller','admin'].forEach(x => {
+    const btn = document.getElementById('btn-'+x);
+    btn.classList.toggle('active', x === r);
+  });
+  buildNav();
+  showTab(0);
+}
+
+function buildNav() {
+  const tabs = navTabs[role];
+  const bar = document.getElementById('nav-bar');
+  bar.innerHTML = tabs.map((tab, i) =>
+    `<div class="nav-tab${i===0?' active':''}" id="ntab-${i}" onclick="showTab(${i})">${tab}</div>`
+  ).join('');
+}
+
+function showTab(i) {
+  document.querySelectorAll('.nav-tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
+  const tab = navTabs[role][i];
+  const view = document.getElementById('main-view');
+  if (role === 'buyer') {
+    if (tab === 'Browse') renderBrowse();
+    else if (tab === 'Near Me') renderNearMe();
+    else if (tab === 'Language') renderLanguage();
+    else if (tab === 'How to Use') renderHowTo();
+  } else if (role === 'seller') {
+    if (tab === 'My Listings') renderMyListings();
+    else if (tab === 'Add Listing') renderAddListing();
+    else if (tab === 'Boost') renderBoost(false);
+    else if (tab === 'Get App') renderGetApp();
+  } else {
+    if (tab === 'Notifications') renderAdminNotifs();
+    else if (tab === 'Revenue') renderAdminRevenue();
+    else if (tab === 'All Listings') renderAdminListings();
+    else if (tab === 'Pricing') renderAdminPricing();
+  }
+}
+
+function renderBrowse() {
+  const view = document.getElementById('main-view');
+  const newCount = allListings.filter(l => l.isNew).length;
+  view.innerHTML = `
+    <div class="filter-bar">
+      <input class="search-box" placeholder="${t('search')}" oninput="filterListings(this.value)" id="browse-search">
+      <button class="near-btn${located?' on':''}" onclick="doNearMe()" id="near-btn">📍 ${located?t('located'):t('nearMeBtn')}</button>
+      <button class="info-btn" onclick="openHowTo()" style="background:var(--green);border-color:var(--green)">i</button>
+    </div>
+    <div class="cat-bar" id="cat-bar">
+      ${['All','Food','Clothes','Services','Electronics','Furniture','Other'].map(c =>
+        `<div class="cat-pill${c===currentCat?' active':''}" onclick="setCat('${c}')">${t(c.toLowerCase()) || c}</div>`
+      ).join('')}
+    </div>
+    ${newCount > 0 ? `<div class="new-banner">🔔 ${newCount} new listing${newCount>1?'s':''} near you</div>` : ''}
+    <div class="listing-grid" id="listing-grid">${buildCards(getSortedListings())}</div>
+  `;
+}
+
+function getSortedListings() {
+  let list = allListings.filter(l => {
+    if (currentCat !== 'All' && l.category !== currentCat) return false;
+    return true;
+  });
+  if (located && userLat) {
+    list = list.map(l => ({ ...l, km: calcDist(userLat, userLng, l.lat || -26.2, l.lng || 28.0) }))
+      .filter(l => l.km <= radiusKm)
+      .sort((a, b) => a.km - b.km);
+  }
+  return [...list.filter(l => l.boosted), ...list.filter(l => !l.boosted)];
+}
+
+function buildCards(list) {
+  if (!list.length) return `<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">🔍</div>No listings found</div>`;
+  return list.map(l => {
+    const payClass = l.payment === 'SnapScan' ? 'pay-snap' : l.payment === 'Both' ? 'pay-both' : 'pay-cod';
+    const payLabel = l.payment === 'SnapScan' ? 'SnapScan' : l.payment === 'Both' ? 'COD+Snap' : 'COD';
+    const hasPhoto = l.photos && l.photos.length > 0;
+    const imgHtml = hasPhoto
+      ? `<img class="card-photo-img" src="${l.photos[0]}" onerror="this.parentElement.innerHTML='<div style=font-size:28px;display:flex;align-items:center;justify-content:center;height:90px>${emojis[l.category]||'📦'}</div>'">`
+      : '';
+    const kmHtml = (located && l.km != null) ? ` <span class="card-km">${l.km.toFixed(1)}km</span>` : '';
+    return `<div class="card${l.boosted?' boosted':''}">
+      <div class="${hasPhoto?'card-photos':'card-emoji'}">
+        ${hasPhoto ? imgHtml : emojis[l.category]||'📦'}
+        ${l.boosted?`<div class="card-tag tag-boost">${t('featured')}</div>`:''}
+        ${l.verified&&!l.boosted?`<div class="card-tag tag-verify">${t('verified')}</div>`:''}
+        ${l.isNew&&!l.boosted?`<div class="card-tag tag-new">${t('newTag')}</div>`:''}
+      </div>
+      <div class="card-body">
+        <div class="card-name">${l.name}</div>
+        <div class="card-loc">📍 ${l.area}${kmHtml}</div>
+        <div class="card-price">R${l.price}</div>
+      </div>
+      <div class="card-foot">
+        <span class="pay-pill ${payClass}">${payLabel}</span>
+        <button class="wa-btn" onclick="contactSeller('${l.phone}','${l.name}')">${t('whatsapp')}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterListings(q) {
+  const list = getSortedListings().filter(l =>
+    !q || l.name.toLowerCase().includes(q.toLowerCase()) || l.area.toLowerCase().includes(q.toLowerCase())
+  );
+  const grid = document.getElementById('listing-grid');
+  if (grid) grid.innerHTML = buildCards(list);
+}
+
+function setCat(cat) {
+  currentCat = cat;
+  renderBrowse();
+}
+
+function doNearMe() {
+  if (located) { located = false; userLat = null; userLng = null; renderBrowse(); return; }
+  const btn = document.getElementById('near-btn');
+  if (btn) { btn.textContent = '📍 Locating...'; btn.disabled = true; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+    located = true;
+    renderBrowse();
+    showToast(t('located') + ' — ' + t('within') + ' ' + radiusKm + 'km');
+  }, () => {
+    userLat = -26.195; userLng = 28.034;
+    located = true;
+    renderBrowse();
+    showToast('Using approximate location');
+  });
+}
+
+function calcDist(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function renderNearMe() {
+  const view = document.getElementById('main-view');
+  view.innerHTML = `
+    <div class="form-wrap">
+      <div class="info-box info-box-green" style="margin-bottom:16px">
+        <div class="info-box-title">📍 ${t('nearMeBtn')}</div>
+        <div class="info-box-text">Sort listings closest to you. Only see items within walking or taxi distance.</div>
+      </div>
+      <button class="btn-primary" onclick="doNearMe();setRole('buyer')" style="margin-bottom:12px">${located?'Reset location':'Find my location'}</button>
+      ${located?`<div style="text-align:center;font-size:12px;color:var(--green);font-weight:600;margin-bottom:16px">✓ Location found</div>`:''}
+      <div class="field" style="margin-bottom:4px"><label>${t('within')}</label></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <span style="font-size:12px;color:var(--text-muted)">1km</span>
+        <input type="range" min="1" max="10" step="1" value="${radiusKm}" style="flex:1" oninput="radiusKm=parseInt(this.value);document.getElementById('km-out').textContent=this.value+'km'">
+        <span style="font-size:12px;color:var(--text-muted)">10km</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text);min-width:36px" id="km-out">${radiusKm}km</span>
+      </div>
+      <div class="section-head">How it works</div>
+      ${['GPS reads your location automatically','Listings sorted by distance — closest first','Distance shown in km on each card','Radius slider filters how far listings show'].map(s=>`<div class="install-step"><span style="color:var(--green);font-weight:700">✓</span>${s}</div>`).join('')}
+    </div>`;
+}
+
+function renderLanguage() {
+  const view = document.getElementById('main-view');
+  view.innerHTML = `
+    <div style="padding:10px 0 6px 14px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px">${t('selectLang')}</div>
+    ${langMeta.map(l => `
+      <div class="lang-option${l.code===window.currentLang?' active-lang':''}" onclick="setLang('${l.code}')">
+        <div>
+          <div class="lang-name">${l.name}</div>
+          <div class="lang-sample">${l.sample}</div>
+        </div>
+        ${l.code===window.currentLang?`<span class="lang-tick">✓</span>`:''}
+      </div>`).join('')}`;
+}
+
+function setLang(code) {
+  window.currentLang = code;
+  localStorage.setItem('spaza_lang', code);
+  applyLang();
+  renderLanguage();
+  showToast(langMeta.find(l=>l.code===code).name + ' selected');
+}
+
+function renderHowTo() {
+  const view = document.getElementById('main-view');
+  const steps = [
+    [t('howToStep1Title'), t('howToStep1')],
+    [t('howToStep2Title'), t('howToStep2')],
+    [t('howToStep3Title'), t('howToStep3')],
+    [t('howToStep4Title'), t('howToStep4')],
+    [t('howToStep5Title'), t('howToStep5')],
+    [t('howToStep6Title'), t('howToStep6')]
+  ];
+  view.innerHTML = `
+    <div style="padding:10px 0 4px 14px;font-size:14px;font-weight:700;color:var(--text)">${t('howToTitle')}</div>
+    ${steps.map((s,i) => `
+      <div class="how-step">
+        <div class="how-num">${i+1}</div>
+        <div class="how-title">${s[0]}</div>
+        <div class="how-text">${s[1]}</div>
+      </div>`).join('')}`;
+}
+
+function openHowTo() {
+  const steps = [
+    [t('howToStep1Title'), t('howToStep1')],
+    [t('howToStep2Title'), t('howToStep2')],
+    [t('howToStep3Title'), t('howToStep3')],
+    [t('howToStep4Title'), t('howToStep4')],
+    [t('howToStep5Title'), t('howToStep5')],
+    [t('howToStep6Title'), t('howToStep6')]
+  ];
+  document.getElementById('howto-title').textContent = t('howToTitle');
+  document.getElementById('howto-content').innerHTML = steps.map((s,i) => `
+    <div class="how-step">
+      <div class="how-num">${i+1}</div>
+      <div class="how-title">${s[0]}</div>
+      <div class="how-text">${s[1]}</div>
+    </div>`).join('');
+  document.getElementById('howto-modal').classList.add('open');
+}
+
+function closeHowTo() {
+  document.getElementById('howto-modal').classList.remove('open');
+}
+
+async function renderMyListings() {
+  const view = document.getElementById('main-view');
+  if (!sellerPhone) {
+    view.innerHTML = `
+      <div class="form-wrap">
+        <div class="info-box">
+          <div class="info-box-title">Enter your WhatsApp number</div>
+          <div class="info-box-text">We use your number to track your listings. No account needed.</div>
+        </div>
+        <div class="field"><label>Your WhatsApp number</label><input type="tel" id="sp-input" placeholder="e.g. 0821234567" value="${sellerPhone}"></div>
+        <button class="btn-primary" onclick="savePhone()">Continue</button>
+      </div>`;
+    return;
+  }
+  const myList = allListings.filter(l => l.phone === sellerPhone);
+  view.innerHTML = `
+    <div class="section-head">${t('myListingsTitle')} (${myList.length})</div>
+    ${myList.length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div>${t('noListings')}</div>` :
+      myList.map(l => `
+        <div class="my-listing-row">
+          <div class="my-l-icon">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`:emojis[l.category]||'📦'}</div>
+          <div class="my-l-info">
+            <div class="my-l-name">${l.name}</div>
+            <div class="my-l-meta">R${l.price} · ${l.area}</div>
+          </div>
+          <div class="my-l-right">
+            <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?t('boosted'):t('live')}</span>
+            <button class="action-btn action-btn-red" onclick="doRemoveListing('${l.id}')">${t('remove')}</button>
+          </div>
+        </div>`).join('')}
+    <div style="padding:12px"><button class="btn-primary" onclick="showTab(1)">${t('listItemFree')}</button></div>`;
+}
+
+function savePhone() {
+  const val = document.getElementById('sp-input')?.value?.trim();
+  if (!val || val.length < 9) { showToast('Please enter a valid number'); return; }
+  sellerPhone = val;
+  localStorage.setItem('spaza_phone', val);
+  renderMyListings();
+}
+
+async function renderAddListing() {
+  const view = document.getElementById('main-view');
+  if (!sellerPhone) {
+    view.innerHTML = `
+      <div class="form-wrap">
+        <div class="info-box">
+          <div class="info-box-title">Enter your WhatsApp number first</div>
+          <div class="info-box-text">We need your number before you can list.</div>
+        </div>
+        <div class="field"><label>Your WhatsApp number</label><input type="tel" id="sp-input" placeholder="e.g. 0821234567"></div>
+        <button class="btn-primary" onclick="savePhone();renderAddListing()">Continue</button>
+      </div>`;
+    return;
+  }
+  const count = allListings.filter(l => l.phone === sellerPhone).length;
+  if (count >= pricing.freeListings) {
+    view.innerHTML = `
+      <div class="limit-wall">
+        <div class="limit-wall-icon">🔒</div>
+        <div class="limit-wall-title">${t('listingLimitTitle')}</div>
+        <div class="limit-wall-text">${t('listingLimitBody')}</div>
+      </div>`;
+    renderBoost(true);
+    return;
+  }
+  selectedPhotos = [];
+  view.innerHTML = `
+    <div class="form-wrap">
+      <div class="field">
+        <label>${t('uploadPhotos')}</label>
+        <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
+          <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this.files)" style="display:none">
+          <div class="photo-upload-icon">📷</div>
+          <div class="photo-upload-text">${t('addPhotos')}</div>
+        </div>
+        <div class="photo-preview-row" id="photo-preview-row"></div>
+      </div>
+      <div class="field"><label>${t('itemName')} *</label><input type="text" id="f-name" placeholder="e.g. Fresh vetkoek x6"></div>
+      <div class="field"><label>${t('category')}</label>
+        <select id="f-cat">
+          ${['Food','Clothes','Services','Electronics','Furniture','Other'].map(c=>`<option>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field"><label>${t('price')} *</label><input type="number" id="f-price" placeholder="e.g. 35" inputmode="numeric"></div>
+      <div class="field"><label>${t('area')} *</label><input type="text" id="f-area" placeholder="e.g. Zone 3, Soweto"></div>
+      <div class="field"><label>${t('waNumber')} *</label><input type="tel" id="f-phone" value="${sellerPhone}" placeholder="e.g. 0821234567"></div>
+      <div class="field"><label>${t('description')}</label><textarea id="f-desc" placeholder="Tell buyers what you are selling..."></textarea></div>
+      <div class="field">
+        <label>${t('paymentAccepted')}</label>
+        <div class="pay-opts">
+          <div class="pay-opt sel" id="po-cash" onclick="selPay('Cash')">${t('cash')}</div>
+          <div class="pay-opt" id="po-snap" onclick="selPay('SnapScan')">${t('snapscan')}</div>
+          <div class="pay-opt" id="po-both" onclick="selPay('Both')">${t('both')}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">${pricing.freeListings - count} free listing${pricing.freeListings-count!==1?'s':''} remaining</div>
+      <button class="btn-primary" onclick="submitListing()">${t('listFree')}</button>
+    </div>`;
+}
+
+function handlePhotos(files) {
+  const remaining = 5 - selectedPhotos.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  if (files.length > remaining) showToast(t('photoLimit'));
+  toAdd.forEach(file => {
+    if (selectedPhotos.length >= 5) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      selectedPhotos.push({ file, dataUrl: e.target.result });
+      renderPhotoPreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotoPreviews() {
+  const row = document.getElementById('photo-preview-row');
+  if (!row) return;
+  row.innerHTML = selectedPhotos.map((p, i) => `
+    <div class="photo-thumb-wrap">
+      <img class="photo-preview" src="${p.dataUrl}">
+      <button class="photo-remove" onclick="removePhoto(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removePhoto(i) {
+  selectedPhotos.splice(i, 1);
+  renderPhotoPreviews();
+}
+
+function selPay(val) {
+  selectedPay = val;
+  ['cash','snap','both'].forEach(k => document.getElementById('po-'+k)?.classList.remove('sel'));
+  const map = { Cash:'cash', SnapScan:'snap', Both:'both' };
+  document.getElementById('po-'+map[val])?.classList.add('sel');
+}
+
+async function submitListing() {
+  const name = document.getElementById('f-name')?.value?.trim();
+  const price = document.getElementById('f-price')?.value;
+  const area = document.getElementById('f-area')?.value?.trim();
+  const phone = document.getElementById('f-phone')?.value?.trim();
+  const desc = document.getElementById('f-desc')?.value?.trim();
+  const cat = document.getElementById('f-cat')?.value;
+  if (!name || !price || !area || !phone) { showToast(t('fillAll')); return; }
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+  try {
+    const docRef = await addListing({
+      name, price: parseFloat(price), area, phone, category: cat,
+      payment: selectedPay, description: desc || '', photos: [],
+      isNew: true, lat: userLat || -26.2, lng: userLng || 28.0
+    });
+    if (selectedPhotos.length > 0) {
+      const urls = [];
+      for (let i = 0; i < selectedPhotos.length; i++) {
+        const url = await uploadPhoto(selectedPhotos[i].file, docRef.id, i);
+        urls.push(url);
+      }
+      await db.collection('listings').doc(docRef.id).update({ photos: urls });
+    }
+    sellerPhone = phone;
+    localStorage.setItem('spaza_phone', phone);
+    await loadListings();
+    sendAdminNotif(`New listing — ${area}`, `${name} listed by ${phone}. Push notification sent to nearby buyers.`, 'new');
+    showToast(t('listingAdded'));
+    setTimeout(() => showTab(0), 1500);
+  } catch (err) {
+    showToast('Error: ' + err.message);
+    if (btn) { btn.textContent = t('listFree'); btn.disabled = false; }
+  }
+}
+
+function renderBoost(isPaywall) {
+  const view = document.getElementById('main-view');
+  const boostHtml = `
+    ${isPaywall ? '' : `<div class="section-head">${t('boostTitle')}</div>`}
+    <div class="form-wrap" style="padding-top:${isPaywall?'4px':'12px'}">
+      <div class="info-box" style="margin-bottom:14px">
+        <div class="info-box-title">${t('boostSub')}</div>
+        <div class="info-box-text">
+          1. ${t('boostHow1')}<br>
+          2. ${t('boostHow2')}<br>
+          3. ${t('boostHow3')}<br>
+          4. ${t('boostHow4')}
+        </div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('7day','${pricing.boost7Price}')">
+        <div>
+          <div class="boost-title">${t('boostDay7')}</div>
+          <div class="boost-desc">${t('boostDay7How')}</div>
+        </div>
+        <div>
+          <div class="boost-price">R${pricing.boost7Price}</div>
+          <div class="boost-method">Airtime</div>
+        </div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('30day','${pricing.boost30Price}')">
+        <div>
+          <div class="boost-title">${t('boostDay30')}</div>
+          <div class="boost-desc">${t('boostDay30How')}</div>
+        </div>
+        <div>
+          <div class="boost-price">R${pricing.boost30Price}</div>
+          <div class="boost-method">SnapScan</div>
+        </div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('monthly','${pricing.badgePrice}')">
+        <div>
+          <div class="boost-title">${t('boostMonthly')}</div>
+          <div class="boost-desc">${t('boostMonthlyHow')}</div>
+        </div>
+        <div>
+          <div class="boost-price">R${pricing.badgePrice}/mo</div>
+          <div class="boost-method">SnapScan / Capitec</div>
+        </div>
+      </div>
+      ${!isPaywall&&sellerPhone?`<div style="font-size:11px;color:var(--text-muted);text-align:center;margin-top:4px">Your number: ${sellerPhone}</div>`:''}
+    </div>`;
+  if (isPaywall) {
+    view.innerHTML += boostHtml;
+  } else {
+    view.innerHTML = boostHtml;
+  }
+}
+
+async function requestBoost(plan, price) {
+  if (!sellerPhone) { showToast('Please add your WhatsApp number in My Listings first'); return; }
+  const planNames = { '7day': '7-day boost', '30day': '30-day boost', monthly: 'Verified badge' };
+  const methods = { '7day': 'airtime', '30day': 'SnapScan', monthly: 'SnapScan / Capitec' };
+  try {
+    await addBoostRequest({
+      seller: sellerPhone,
+      plan: planNames[plan],
+      price: `R${price}`,
+      method: methods[plan],
+      listingPhone: sellerPhone,
+      status: 'pending'
+    });
+    await loadNotifs();
+    updateNotifBadge();
+    sendAdminWA(`Boost request from ${sellerPhone}: ${planNames[plan]} — R${price} via ${methods[plan]}`);
+    showToast(t('boostRequested'));
+  } catch {
+    showToast('Could not send request. Please try again.');
+  }
+}
+
+function sendAdminNotif(title, body, type) {
+  addBoostRequest({ title, body, type, status: 'info', createdAt: new Date() }).catch(() => {});
+}
+
+function renderGetApp() {
+  const view = document.getElementById('main-view');
+  view.innerHTML = `
+    <div class="form-wrap">
+      <div class="qr-area">
+        <div class="qr-title">${t('getAppTitle')}</div>
+        <div class="qr-sub">${t('getAppSub')}</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" class="qr-svg">
+          <rect width="120" height="120" fill="white"/>
+          <g fill="black">
+            <rect x="10" y="10" width="40" height="40"/><rect x="15" y="15" width="30" height="30" fill="white"/><rect x="20" y="20" width="20" height="20"/>
+            <rect x="70" y="10" width="40" height="40"/><rect x="75" y="15" width="30" height="30" fill="white"/><rect x="80" y="20" width="20" height="20"/>
+            <rect x="10" y="70" width="40" height="40"/><rect x="15" y="75" width="30" height="30" fill="white"/><rect x="20" y="80" width="20" height="20"/>
+            <rect x="70" y="60" width="8" height="8"/><rect x="82" y="60" width="8" height="8"/><rect x="94" y="60" width="16" height="8"/>
+            <rect x="70" y="72" width="16" height="8"/><rect x="94" y="72" width="16" height="8"/>
+            <rect x="70" y="84" width="8" height="8"/><rect x="82" y="84" width="28" height="8"/>
+            <rect x="70" y="96" width="8" height="8"/><rect x="82" y="96" width="8" height="8"/><rect x="94" y="96" width="16" height="8"/>
+            <rect x="54" y="10" width="8" height="8"/><rect x="54" y="22" width="8" height="16"/><rect x="54" y="42" width="8" height="8"/>
+            <rect x="54" y="54" width="8" height="8"/><rect x="10" y="54" width="36" height="8"/>
+          </g>
+        </svg>
+        <div class="qr-url">spazamarket.co.za</div>
+        <button class="wa-share-btn" onclick="shareAppLink()">${t('shareWhatsApp')}</button>
+      </div>
+      <div class="section-head">${t('howToInstall')}</div>
+      ${[t('install1'),t('install2'),t('install3'),t('install4'),t('install5')].map(s=>`<div class="install-step"><span style="color:var(--green);font-weight:700">→</span>${s}</div>`).join('')}
+    </div>`;
+}
+
+function shareAppLink() {
+  const msg = encodeURIComponent('Shop and sell near you on Spaza Market 🛒\nNo app store needed — just tap the link:\nhttps://spazamarket.co.za');
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+
+function contactSeller(phone, item) {
+  const msg = encodeURIComponent(`Hi, I saw your listing on Spaza Market: *${item}*. Is it still available?`);
+  window.open(`https://wa.me/27${phone.replace(/^0/, '')}?text=${msg}`, '_blank');
+}
+
+function handleAdminClick() {
+  if (adminLoggedIn) { setRole('admin'); return; }
+  document.getElementById('admin-modal').classList.add('open');
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-pass').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  applyLoginLang();
+}
+
+function applyLoginLang() {
+  document.getElementById('login-title').textContent = t('adminLogin');
+  document.getElementById('login-sub').textContent = 'Spaza Market admin access';
+  document.getElementById('lbl-email').textContent = t('email');
+  document.getElementById('lbl-pass').textContent = t('password');
+  document.getElementById('login-btn').textContent = t('login');
+}
+
+async function doLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  err.style.display = 'none';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    adminLoggedIn = true;
+    closeAdminModal();
+    await loadNotifs();
+    await loadPayments();
+    updateNotifBadge();
+    setRole('admin');
+  } catch {
+    err.textContent = t('wrongPassword');
+    err.style.display = 'block';
+    btn.textContent = t('login'); btn.disabled = false;
+  }
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').classList.remove('open');
+}
+
+async function renderAdminNotifs() {
+  const view = document.getElementById('main-view');
+  await loadNotifs();
+  const pending = allNotifs.filter(n => n.status === 'pending');
+  const done = allNotifs.filter(n => n.status !== 'pending');
+  view.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-num">${allListings.length}</div><div class="stat-lbl">${t('totalListings')}</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${pending.length}</div><div class="stat-lbl">${t('pending')}</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0)}</div><div class="stat-lbl">${t('revenue')}</div></div>
+    </div>
+    <div class="section-head">${t('notifications')} (${pending.length} ${t('pending')})</div>
+    ${allNotifs.length===0?`<div class="empty-state"><div class="empty-icon">🔔</div>${t('noNotifs')}</div>`:''}
+    ${allNotifs.map(n => {
+      const isBoost = n.type !== 'new' && n.type !== 'info';
+      const isPend = n.status === 'pending';
+      const cls = isPend ? (isBoost?'unread-boost':'unread-new') : '';
+      const timeStr = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) : 'just now';
+      return `<div class="notif-card ${cls}">
+        <div class="notif-top">
+          <div class="notif-title">${isBoost?'⚡':'🆕'} ${n.title || (isBoost?t('boostRequest'):t('newListing'))}</div>
+          <div class="notif-time">${timeStr}</div>
+        </div>
+        <div class="notif-body">${n.body || `${n.seller||n.listingPhone||''} — ${n.plan||''} ${n.price||''}`}</div>
+        ${isPend&&isBoost?`<div class="notif-actions">
+          <button class="notif-btn notif-btn-amber" onclick="sendPayLink('${n.id}','${n.seller||n.listingPhone}','${n.price}')">${t('sendPayLink')}</button>
+          <button class="notif-btn notif-btn-gray" onclick="dismissNotif('${n.id}')">${t('dismiss')}</button>
+        </div>`:''}
+        ${!isPend?`<div class="notif-done">✓ ${t('done')}</div>`:''}
+      </div>`;
+    }).join('')}`;
+  updateNotifBadge();
+}
+
+async function sendPayLink(id, phone, price) {
+  const msg = encodeURIComponent(`Hi! Your Spaza Market boost request has been received.\n\nAmount: ${price}\n\nPlease pay via SnapScan to:\nhttps://pos.snapscan.io/qr/spazamarket\n\nOnce payment is confirmed your listing will be boosted. — Spaza Market`);
+  window.open(`https://wa.me/27${(phone||ADMIN_WA).replace(/^0/,'')}?text=${msg}`, '_blank');
+  await updateBoostRequest(id, { status: 'sent' });
+  await addPayment({ seller: phone, amount: parseInt((price||'0').replace('R','')), plan: 'Boost', method: 'SnapScan' });
+  await loadNotifs();
+  await loadPayments();
+  renderAdminNotifs();
+  showToast(t('payLinkSent'));
+}
+
+function sendAdminWA(msg) {
+  console.log('Admin WA notification:', msg);
+}
+
+async function dismissNotif(id) {
+  await updateBoostRequest(id, { status: 'dismissed' });
+  await loadNotifs();
+  renderAdminNotifs();
+}
+
+async function renderAdminRevenue() {
+  const view = document.getElementById('main-view');
+  await loadPayments();
+  const total = allPayments.reduce((s,p) => s + parseInt(p.amount||0), 0);
+  view.innerHTML = `
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${total}</div><div class="stat-lbl">${t('thisMonth')}</div></div>
+      <div class="stat-card"><div class="stat-num">${allPayments.length}</div><div class="stat-lbl">${t('payments')}</div></div>
+      <div class="stat-card"><div class="stat-num">${allListings.filter(l=>l.boosted).length}</div><div class="stat-lbl">${t('boosted')}</div></div>
+    </div>
+    <div class="section-head">${t('payHistory')}</div>
+    ${allPayments.length===0?`<div class="empty-state"><div class="empty-icon">💰</div>${t('noRevenue')}</div>`:''}
+    ${allPayments.map(p=>`
+      <div class="rev-row">
+        <div>
+          <div class="rev-label">${p.plan||'Boost'} — ${p.seller||'Seller'}</div>
+          <div class="rev-sub">${p.method||'SnapScan'}</div>
+        </div>
+        <div class="rev-amount">R${p.amount||0}</div>
+      </div>`).join('')}
+    <div class="form-wrap" style="padding-top:12px">
+      <div class="info-box info-box-green">
+        <div class="info-box-title">${t('revenueModel')}</div>
+        <div class="info-box-text">${t('revenueModelText')}</div>
+      </div>
+    </div>`;
+}
+
+async function renderAdminListings() {
+  const view = document.getElementById('main-view');
+  await loadListings();
+  view.innerHTML = `
+    <div class="section-head">${t('allListings')} (${allListings.length})</div>
+    ${allListings.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>No listings yet</div>`:''}
+    ${allListings.map(l=>`
+      <div class="all-listing-row">
+        <div class="all-l-left">
+          <div style="font-size:20px">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`:emojis[l.category]||'📦'}</div>
+          <div class="all-l-info">
+            <div class="name">${l.name}</div>
+            <div class="meta">${l.phone} · R${l.price} · ${l.area}</div>
+          </div>
+        </div>
+        <div class="all-l-right">
+          <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?t('boosted'):t('live')}</span>
+          <button class="action-btn action-btn-red" onclick="adminRemove('${l.id}')">${t('remove')}</button>
+        </div>
+      </div>`).join('')}`;
+}
+
+async function adminRemove(id) {
+  if (!confirm(t('confirmRemove'))) return;
+  await removeListing(id);
+  await loadListings();
+  renderAdminListings();
+  showToast(t('listingRemoved'));
+}
+
+async function doRemoveListing(id) {
+  if (!confirm(t('confirmRemove'))) return;
+  await removeListing(id);
+  await loadListings();
+  renderMyListings();
+  showToast(t('listingRemoved'));
+}
+
+async function renderAdminPricing() {
+  const view = document.getElementById('main-view');
+  pricing = await getPricing();
+  view.innerHTML = `
+    <div class="form-wrap">
+      <div class="info-box info-box-green" style="margin-bottom:16px">
+        <div class="info-box-title">${t('pricingTitle')}</div>
+        <div class="info-box-text">${t('pricingSub')}</div>
+      </div>
+      <div class="pricing-field">
+        <label>${t('freeListings')}</label>
+        <input type="number" id="p-free" value="${pricing.freeListings}" min="0" max="100" inputmode="numeric">
+        <div class="pricing-sub">Listings each phone number can post for free</div>
+      </div>
+      <div class="pricing-field">
+        <label>${t('extraListingFee')}</label>
+        <input type="number" id="p-extra" value="${pricing.extraListingFee}" min="0" inputmode="numeric">
+        <div class="pricing-sub">Fee to post beyond the free allowance</div>
+      </div>
+      <div class="pricing-field">
+        <label>${t('boost7Price')}</label>
+        <input type="number" id="p-b7" value="${pricing.boost7Price}" min="0" inputmode="numeric">
+        <div class="pricing-sub">7-day featured boost — paid via airtime</div>
+      </div>
+      <div class="pricing-field">
+        <label>${t('boost30Price')}</label>
+        <input type="number" id="p-b30" value="${pricing.boost30Price}" min="0" inputmode="numeric">
+        <div class="pricing-sub">30-day featured boost — paid via SnapScan</div>
+      </div>
+      <div class="pricing-field">
+        <label>${t('badgePrice')}</label>
+        <input type="number" id="p-badge" value="${pricing.badgePrice}" min="0" inputmode="numeric">
+        <div class="pricing-sub">Monthly verified business badge</div>
+      </div>
+      <button class="btn-primary" onclick="doSavePricing()">${t('savePricing')}</button>
+    </div>`;
+}
+
+async function doSavePricing() {
+  const newPricing = {
+    freeListings: parseInt(document.getElementById('p-free').value)||2,
+    extraListingFee: parseInt(document.getElementById('p-extra').value)||30,
+    boost7Price: parseInt(document.getElementById('p-b7').value)||20,
+    boost30Price: parseInt(document.getElementById('p-b30').value)||50,
+    badgePrice: parseInt(document.getElementById('p-badge').value)||99
+  };
+  try {
+    await savePricing(newPricing);
+    pricing = newPricing;
+    showToast(t('pricingSaved'));
+  } catch {
+    showToast('Could not save. Check your connection.');
+  }
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+auth.onAuthStateChanged(user => {
+  if (user && user.email === 'eagle.electrical01@gmail.com') {
+    adminLoggedIn = true;
+    loadNotifs().then(updateNotifBadge);
+    loadPayments();
+  } else {
+    adminLoggedIn = false;
+    updateNotifBadge();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
