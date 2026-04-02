@@ -2,1301 +2,954 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#128C7E">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Spaza Market">
-<meta name="description" content="Buy and sell near you — Spaza Market">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="images/icon-192.png">
 <title>Spaza Market</title>
 <style>
-:root{--green:#128C7E;--green-dark:#0a6b61;--green-light:#E1F5EE;--green-text:#085041;--amber:#BA7517;--amber-light:#FAEEDA;--amber-text:#633806;--wa:#25D366;--red:#A32D2D;--red-light:#FCEBEB;--blue:#185FA5;--blue-light:#E6F1FB;--radius:10px;--radius-lg:14px;--shadow:0 1px 3px rgba(0,0,0,0.08)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f0f2f5;min-height:100vh;display:flex;justify-content:center;align-items:flex-start}
-.app-shell{width:100%;max-width:430px;min-height:100vh;background:#fff;display:flex;flex-direction:column;position:relative;overflow:hidden}
-
-/* TOPBAR */
-.topbar{background:var(--green);padding:12px 14px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+:root{--green:#128C7E;--green-dark:#0a6b5e;--green-light:#E1F5EE;--green-text:#085041;--amber:#BA7517;--amber-light:#FAEEDA;--amber-text:#633806;--red:#A32D2D;--red-light:#FCEBEB;--blue:#185FA5;--blue-light:#E6F1FB;--blue-text:#0C447C;--purple:#534AB7;--purple-light:#EEEDFE;--purple-text:#3C3489;--border:#e0e0e0;--radius:10px;--radius-sm:6px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:100vh}
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:#fff;display:flex;flex-direction:column}
+.topbar{background:var(--green);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
 .tb-brand{display:flex;align-items:center;gap:9px}
-.tb-logo{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:17px}
-.tb-name{color:#fff;font-size:15px;font-weight:600;line-height:1.2}
-.tb-sub{color:rgba(255,255,255,0.78);font-size:10px}
-.tb-actions{display:flex;gap:5px;align-items:center}
-.role-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;font-weight:500;position:relative;transition:background 0.15s}
-.role-btn.active{background:rgba(255,255,255,0.32)}
-.notif-badge{position:absolute;top:-3px;right:-3px;background:#EF9F27;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--green)}
-
-/* NAV TABS */
-.nav-tabs{display:flex;background:#fff;border-bottom:1px solid #e8e8e8;flex-shrink:0;overflow-x:auto}
-.nav-tabs::-webkit-scrollbar{display:none}
-.nav-tab{flex:1;min-width:60px;padding:10px 4px 8px;text-align:center;font-size:11px;color:#888;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all 0.15s;font-weight:500}
-.nav-tab.active{color:var(--green);border-bottom-color:var(--green);background:#fafffe}
-
-/* CONTENT AREA */
-.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-
-/* FILTERS */
-.filter-row{display:flex;gap:7px;padding:9px 12px;background:#f8f9fa;border-bottom:1px solid #eee;align-items:center}
-.search-box{flex:1;display:flex;align-items:center;background:#fff;border:1px solid #ddd;border-radius:var(--radius);padding:7px 11px;gap:7px}
-.search-box input{border:none;outline:none;font-size:13px;flex:1;background:transparent;color:#333}
-.search-icon{color:#aaa;font-size:14px}
-.nearme-btn{background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:8px 11px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:600;transition:background 0.15s}
-.nearme-btn.on{background:#1a7a4a}
-.cats-row{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:#f8f9fa;border-bottom:1px solid #eee}
-.cats-row::-webkit-scrollbar{display:none}
-.cat-pill{white-space:nowrap;padding:5px 13px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid #ddd;background:#fff;color:#666;font-weight:500;transition:all 0.15s}
+.tb-logo{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:18px}
+.tb-name{color:#fff;font-size:15px;font-weight:600}
+.tb-sub{color:rgba(255,255,255,0.75);font-size:10px;margin-top:1px}
+.tb-actions{display:flex;align-items:center;gap:5px}
+.role-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:11px;padding:5px 9px;border-radius:20px;cursor:pointer;position:relative;transition:background 0.15s;font-weight:500}
+.role-btn.active{background:rgba(255,255,255,0.35);font-weight:600}
+.notif-badge{position:absolute;top:-4px;right:-4px;background:#EF9F27;color:#fff;font-size:9px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;border:1.5px solid var(--green)}
+.nav{display:flex;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav-tab{flex:1;min-width:fit-content;padding:10px 12px;text-align:center;font-size:11px;color:#888;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color 0.15s;font-weight:500}
+.nav-tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:600}
+.view{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.filter-bar{padding:8px 12px;background:#f8f8f8;border-bottom:1px solid var(--border);display:flex;gap:7px;align-items:center;position:sticky;top:0;z-index:10}
+.search-box{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:20px;font-size:13px;background:#fff;outline:none}
+.search-box:focus{border-color:var(--green)}
+.near-btn{background:var(--green);color:#fff;border:none;border-radius:20px;padding:8px 13px;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:500}
+.near-btn.on{background:#3B6D11}
+.info-btn{background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.6);color:#fff;border-radius:50%;width:30px;height:30px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;background:var(--green)}
+.cat-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:#f8f8f8;border-bottom:1px solid var(--border)}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-pill{white-space:nowrap;padding:5px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:#fff;color:#666;transition:all 0.15s}
 .cat-pill.active{background:var(--green);color:#fff;border-color:var(--green)}
-
-/* NEW LISTING BANNER */
-.new-banner{background:var(--green-light);border-bottom:1px solid #9FE1CB;padding:8px 14px;font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:7px;cursor:pointer}
-.new-banner-dot{width:8px;height:8px;background:var(--green);border-radius:50%;flex-shrink:0;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-
-/* LISTINGS GRID */
-.listings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:10px 12px 80px}
-.listing-card{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:transform 0.1s}
-.listing-card:active{transform:scale(0.98)}
-.listing-card.boosted{border:2px solid var(--amber)}
-.listing-card.verified-card{border:2px solid var(--green)}
-.card-photos{height:90px;background:#f5f5f5;position:relative;overflow:hidden}
-.card-photo-img{width:100%;height:100%;object-fit:cover}
-.card-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px}
-.card-photo-count{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.55);color:#fff;font-size:9px;padding:2px 5px;border-radius:5px}
-.card-tag{position:absolute;font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
-.tag-featured{top:5px;right:5px;background:var(--amber);color:#fff}
-.tag-verified{top:5px;left:5px;background:var(--green);color:#fff}
-.tag-new{top:5px;right:5px;background:var(--red);color:#fff}
+.new-banner{background:var(--green-light);padding:8px 14px;font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:6px;border-bottom:1px solid #b2ddd4}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px 12px}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.1s}
+.card:active{transform:scale(0.98)}
+.card.boosted{border:2px solid var(--amber)}
+.card-img-wrap{height:90px;background:#f5f5f5;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card-img-wrap img{width:100%;height:100%;object-fit:cover}
+.card-emoji{font-size:28px}
+.card-tag{position:absolute;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600;top:5px}
+.tag-boost{right:5px;background:var(--amber);color:#fff}
+.tag-verify{left:5px;background:var(--green);color:#fff}
+.tag-new{right:5px;background:var(--red);color:#fff}
 .card-body{padding:7px 8px}
-.card-title{font-size:12px;font-weight:600;color:#1a1a1a;line-height:1.3;margin-bottom:2px}
-.card-loc{font-size:10px;color:#888;margin-bottom:3px;display:flex;align-items:center;gap:3px}
+.card-name{font-size:12px;font-weight:600;color:#111;line-height:1.3;margin-bottom:2px}
+.card-loc{font-size:11px;color:#888;margin-bottom:3px}
 .card-km{color:var(--green);font-weight:600}
 .card-price{font-size:14px;font-weight:700;color:var(--green)}
-.card-footer{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-top:1px solid #f0f0f0}
-.pay-chip{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:600}
-.chip-cod{background:#E1F5EE;color:#085041}
-.chip-snap{background:#E6F1FB;color:#185FA5}
-.chip-both{background:#EEEDFE;color:#3C3489}
-.wa-contact{background:var(--wa);color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:7px;cursor:pointer;font-weight:600}
-.no-listings{text-align:center;padding:40px 20px;color:#aaa;font-size:13px;grid-column:span 2}
-.no-listings-icon{font-size:36px;margin-bottom:8px}
-
-/* SELLER FORMS */
-.form-section{padding:10px 12px}
-.form-card{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:14px;margin-bottom:12px}
-.form-title{font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:12px}
-.field-group{margin-bottom:12px}
-.field-label{font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px}
-.field-input{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:var(--radius);font-size:13px;color:#1a1a1a;background:#fff;outline:none;transition:border-color 0.15s}
-.field-input:focus{border-color:var(--green)}
-.field-textarea{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:var(--radius);font-size:13px;color:#1a1a1a;background:#fff;outline:none;resize:none;height:70px;transition:border-color 0.15s;font-family:inherit}
-.field-textarea:focus{border-color:var(--green)}
-.field-select{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:var(--radius);font-size:13px;color:#1a1a1a;background:#fff;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
-.pay-opts{display:flex;gap:6px}
-.pay-opt{flex:1;padding:8px 4px;border:1px solid #ddd;border-radius:var(--radius);font-size:11px;text-align:center;cursor:pointer;color:#666;font-weight:600;transition:all 0.15s}
-.pay-opt.sel{border-color:var(--green);color:var(--green-text);background:var(--green-light)}
-
-/* PHOTO UPLOAD */
-.photo-upload-area{border:2px dashed #ddd;border-radius:var(--radius);padding:16px;text-align:center;cursor:pointer;transition:border-color 0.15s;background:#fafafa}
-.photo-upload-area:hover{border-color:var(--green)}
-.photo-upload-icon{font-size:24px;margin-bottom:6px}
-.photo-upload-text{font-size:12px;color:#888}
-.photo-upload-sub{font-size:10px;color:#bbb;margin-top:2px}
-.photos-preview{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
-.photo-thumb{width:60px;height:60px;border-radius:var(--radius);overflow:hidden;position:relative;border:1px solid #eee}
-.photo-thumb img{width:100%;height:100%;object-fit:cover}
-.photo-remove{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-#photo-input{display:none}
-
-/* BUTTONS */
-.btn-primary{width:100%;padding:12px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;transition:background 0.15s;font-family:inherit}
+.card-foot{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-top:1px solid #f0f0f0}
+.pay-pill{font-size:9px;padding:2px 6px;border-radius:8px;font-weight:600}
+.pay-cod{background:var(--green-light);color:var(--green-text)}
+.pay-snap{background:var(--blue-light);color:var(--blue-text)}
+.pay-both{background:var(--purple-light);color:var(--purple-text)}
+.wa-btn{background:#25D366;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:6px;cursor:pointer;font-weight:600}
+.empty-state{text-align:center;padding:40px 20px;color:#888;font-size:14px;grid-column:span 2}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.section-head{padding:12px 14px 6px;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px}
+.form-wrap{padding:12px}
+.field{margin-bottom:12px}
+.field label{font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:#fff;outline:none;color:#111;transition:border-color 0.15s;font-family:inherit}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green)}
+.field textarea{height:70px;resize:none}
+.pay-opts{display:flex;gap:8px}
+.pay-opt{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:12px;text-align:center;cursor:pointer;color:#666;background:#fff;transition:all 0.15s;font-weight:500}
+.pay-opt.sel{border-color:var(--green);color:var(--green-text);background:var(--green-light);font-weight:600}
+.photo-upload{border:2px dashed var(--border);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;background:#fafafa}
+.photo-upload:hover{border-color:var(--green)}
+.photo-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.photo-thumb{position:relative;display:inline-block}
+.photo-thumb img{width:64px;height:64px;border-radius:var(--radius-sm);object-fit:cover;border:1.5px solid var(--border)}
+.photo-rm{position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.btn-primary{width:100%;padding:13px;border:none;border-radius:var(--radius);background:var(--green);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;transition:background 0.15s;font-family:inherit}
 .btn-primary:active{background:var(--green-dark)}
-.btn-secondary{width:100%;padding:11px;border:1px solid #ddd;border-radius:var(--radius);background:#fff;color:#666;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-.btn-amber{width:100%;padding:12px;border:none;border-radius:var(--radius);background:var(--amber);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
-
-/* MY LISTINGS */
-.my-listing-item{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
-.mli-left{display:flex;align-items:center;gap:10px}
-.mli-icon{width:42px;height:42px;border-radius:var(--radius);background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden}
-.mli-icon img{width:100%;height:100%;object-fit:cover}
-.mli-name{font-size:13px;font-weight:600;color:#1a1a1a}
-.mli-meta{font-size:11px;color:#888;margin-top:1px}
-.mli-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-.status-pill{font-size:9px;padding:3px 8px;border-radius:8px;font-weight:700}
-.pill-live{background:#E1F5EE;color:#085041}
-.pill-boosted{background:#FAEEDA;color:#633806}
-.pill-pending{background:#FCEBEB;color:#791F1F}
-.small-btn{font-size:10px;color:#888;background:none;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer}
-
-/* BOOST CARDS */
-.boost-plan-card{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:13px 14px;margin-bottom:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.15s}
-.boost-plan-card:hover,.boost-plan-card:active{border-color:var(--amber)}
-.bpc-title{font-size:13px;font-weight:600;color:#1a1a1a}
-.bpc-sub{font-size:11px;color:#888;margin-top:2px}
-.bpc-price{font-size:16px;font-weight:700;color:var(--amber);text-align:right}
-.bpc-how{font-size:10px;color:#aaa;margin-top:1px;text-align:right}
-.boost-info-box{background:var(--amber-light);border:1px solid #FAC775;border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:8px}
-.bib-title{font-size:12px;font-weight:700;color:var(--amber-text);margin-bottom:6px}
-.bib-step{font-size:11px;color:#854F0B;padding:2px 0;line-height:1.5}
-
-/* PAYMENT WALL */
-.paywall-header{background:var(--amber-light);border-bottom:1px solid #FAC775;padding:14px;text-align:center}
-.paywall-icon{font-size:28px;margin-bottom:6px}
-.paywall-title{font-size:15px;font-weight:700;color:var(--amber-text)}
-.paywall-sub{font-size:12px;color:#854F0B;margin-top:3px}
-
-/* ADMIN */
-.admin-login-wrap{padding:30px 20px;display:flex;flex-direction:column;align-items:center}
-.admin-login-icon{font-size:40px;margin-bottom:12px}
-.admin-login-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.admin-login-sub{font-size:12px;color:#888;margin-bottom:20px;text-align:center}
-.admin-login-card{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:18px;width:100%}
-.login-error{background:var(--red-light);color:var(--red);font-size:12px;padding:8px 11px;border-radius:var(--radius);margin-bottom:10px;display:none}
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px}
-.stat-card{background:#f8f9fa;border-radius:var(--radius);padding:10px;text-align:center}
-.stat-num{font-size:20px;font-weight:700;color:#1a1a1a}
+.btn-secondary{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--radius);background:#fff;color:#666;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit}
+.boost-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.15s}
+.boost-card:hover{border-color:var(--amber)}
+.boost-card:active{transform:scale(0.98)}
+.boost-title{font-size:14px;font-weight:600;color:#111;margin-bottom:2px}
+.boost-desc{font-size:11px;color:#888}
+.boost-price{font-size:16px;font-weight:700;color:var(--amber);text-align:right}
+.boost-method{font-size:10px;color:#888;text-align:right;margin-top:2px}
+.info-box{background:var(--amber-light);border:1px solid #f0c060;border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
+.info-box-title{font-size:13px;font-weight:700;color:var(--amber-text);margin-bottom:6px}
+.info-box-body{font-size:12px;color:var(--amber-text);line-height:1.6}
+.info-box.green{background:var(--green-light);border-color:#9FE1CB}
+.info-box.green .info-box-title,.info-box.green .info-box-body{color:var(--green-text)}
+.my-row{background:#fff;border-bottom:1px solid #f0f0f0;padding:11px 14px;display:flex;align-items:center;gap:11px}
+.my-icon{font-size:22px;flex-shrink:0}
+.my-icon img{width:36px;height:36px;border-radius:6px;object-fit:cover}
+.my-info{flex:1;min-width:0}
+.my-name{font-size:13px;font-weight:600;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.my-meta{font-size:11px;color:#888;margin-top:1px}
+.my-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.status-pill{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.status-live{background:var(--green-light);color:var(--green-text)}
+.status-boosted{background:var(--amber-light);color:var(--amber-text)}
+.action-btn{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;border:none;font-weight:500;background:#f5f5f5;color:#666}
+.action-btn.red{background:var(--red-light);color:var(--red)}
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
+.stat-card{background:#f8f8f8;border-radius:var(--radius);padding:10px;text-align:center}
+.stat-num{font-size:20px;font-weight:700;color:#111}
 .stat-lbl{font-size:10px;color:#888;margin-top:2px}
-.notif-item{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:12px 13px;margin-bottom:8px}
-.notif-item.unread-boost{border-left:3px solid var(--amber)}
-.notif-item.unread-new{border-left:3px solid var(--green)}
-.notif-item.unread-pay{border-left:3px solid var(--blue)}
+.notif-card{background:#fff;border-bottom:1px solid #f0f0f0;padding:12px 14px}
+.notif-card.unread-boost{border-left:4px solid var(--amber)}
+.notif-card.unread-new{border-left:4px solid var(--green)}
 .notif-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
-.notif-title-text{font-size:12px;font-weight:700;color:#1a1a1a}
-.notif-time{font-size:10px;color:#aaa}
-.notif-body-text{font-size:11px;color:#666;margin-bottom:8px;line-height:1.4}
-.notif-btns{display:flex;gap:6px}
-.notif-btn{font-size:11px;padding:6px 11px;border-radius:var(--radius);cursor:pointer;border:none;font-weight:600;font-family:inherit}
-.nb-green{background:var(--green);color:#fff}
-.nb-amber{background:var(--amber);color:#fff}
-.nb-gray{background:#f0f0f0;color:#666;border:1px solid #ddd}
-.done-text{font-size:10px;color:#3B6D11;font-weight:600}
-.revenue-list{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);overflow:hidden;margin-bottom:8px}
-.rev-row{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid #f5f5f5}
-.rev-row:last-child{border-bottom:none}
-.rev-label{font-size:12px;font-weight:600;color:#1a1a1a}
-.rev-sub-text{font-size:10px;color:#aaa;margin-top:1px}
-.rev-amount{font-size:13px;font-weight:700;color:var(--green)}
-.pricing-field{margin-bottom:12px}
-.pricing-label{font-size:11px;font-weight:600;color:#555;display:block;margin-bottom:4px}
-.pricing-input{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:var(--radius);font-size:14px;color:#1a1a1a;font-weight:600;background:#fff;outline:none}
-.pricing-input:focus{border-color:var(--green)}
-
-/* HOW TO USE */
-.howto-item{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:13px 14px;margin-bottom:8px}
-.howto-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.howto-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.howto-title{font-size:13px;font-weight:700;color:#1a1a1a}
-.howto-body{font-size:12px;color:#666;line-height:1.5;padding-left:36px}
-
-/* LANGUAGE */
-.lang-item{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:11px 13px;margin-bottom:7px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:border-color 0.15s}
-.lang-item.active-lang{border-color:var(--green);background:var(--green-light)}
-.lang-name{font-size:13px;font-weight:600;color:#1a1a1a}
-.lang-greeting{font-size:11px;color:#888;margin-top:1px}
-.lang-check{font-size:16px;color:var(--green)}
-
-/* GET APP / QR */
-.qr-section{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:16px;text-align:center;margin-bottom:12px}
-.qr-title{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.qr-sub{font-size:12px;color:#888;margin-bottom:14px}
-.qr-svg{margin:0 auto 10px}
-.qr-url{font-size:13px;color:var(--green);font-weight:600;margin-bottom:12px}
-.install-step{font-size:12px;color:#555;padding:8px 0;border-bottom:1px solid #f5f5f5;display:flex;align-items:flex-start;gap:8px;line-height:1.4}
-.install-step:last-child{border-bottom:none}
-.install-num{font-size:11px;font-weight:700;color:var(--green);min-width:18px}
-
-/* NEAR ME SETTINGS */
-.nm-section{background:#fff;border:1px solid #e8e8e8;border-radius:var(--radius-lg);padding:14px;margin-bottom:10px}
-.nm-title{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
-.radius-row{display:flex;align-items:center;gap:10px}
-.radius-slider{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:#ddd;outline:none}
-.radius-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--green);cursor:pointer}
-.radius-val{font-size:13px;font-weight:700;color:var(--green);min-width:40px}
-.nm-tip{font-size:11px;color:#888;margin-top:8px;line-height:1.4}
-
-/* TOAST */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
-.toast.show{opacity:1}
-
-/* DETAIL MODAL */
-.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end}
-.detail-overlay.open{display:flex}
-.detail-sheet{background:#fff;border-radius:16px 16px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding-bottom:20px}
-.detail-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #eee}
-.detail-close{background:none;border:none;font-size:20px;cursor:pointer;color:#888}
-.detail-photos{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
-.detail-photos::-webkit-scrollbar{display:none}
-.detail-photo{width:140px;height:140px;flex-shrink:0;border-radius:var(--radius-lg);overflow:hidden;background:#f5f5f5}
-.detail-photo img{width:100%;height:100%;object-fit:cover}
-.detail-photo-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px}
-.detail-info{padding:0 16px}
-.detail-title{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.detail-price{font-size:22px;font-weight:800;color:var(--green);margin-bottom:8px}
-.detail-meta{font-size:12px;color:#888;margin-bottom:12px;line-height:1.5}
-.detail-desc{font-size:13px;color:#444;line-height:1.6;margin-bottom:16px}
-.detail-wa-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--wa);color:#fff;border:none;border-radius:var(--radius);padding:14px;width:100%;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin:0 16px;width:calc(100% - 32px)}
-
-/* BOTTOM NAV SPACER */
-.bottom-spacer{height:20px}
-
-/* LOADING */
-.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:12px}
-.loading-logo{font-size:48px;animation:bounce 0.8s infinite alternate}
-@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
-.loading-text{font-size:14px;color:#888}
-
-/* SECTION HEADER */
-.section-hdr{padding:10px 12px 4px;font-size:11px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px}
-.section-content{padding:0 12px 80px}
-
-/* DIVIDER */
-.divider{height:1px;background:#f0f0f0;margin:8px 0}
-
-/* INFO BUTTON */
-.info-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
-
-/* LOGOUT */
-.logout-row{padding:12px;border-top:1px solid #eee;margin-top:8px}
-.logout-btn{width:100%;padding:10px;border:1px solid #ddd;border-radius:var(--radius);background:#fff;color:#888;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.notif-title{font-size:13px;font-weight:700;color:#111}
+.notif-time{font-size:10px;color:#888;flex-shrink:0;margin-left:8px}
+.notif-body{font-size:12px;color:#888;margin-bottom:8px;line-height:1.5}
+.notif-actions{display:flex;gap:7px}
+.notif-btn{font-size:12px;padding:6px 12px;border-radius:var(--radius-sm);cursor:pointer;border:none;font-weight:600;font-family:inherit}
+.notif-btn.amber{background:var(--amber);color:#fff}
+.notif-btn.gray{background:#f0f0f0;color:#666}
+.notif-done{font-size:11px;color:#3B6D11;font-weight:600}
+.rev-row{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0}
+.rev-label{font-size:13px;font-weight:600;color:#111}
+.rev-sub{font-size:11px;color:#888;margin-top:1px}
+.rev-amount{font-size:14px;font-weight:700;color:var(--green);flex-shrink:0}
+.pricing-field{margin-bottom:14px}
+.pricing-field label{font-size:13px;font-weight:600;color:#111;display:block;margin-bottom:5px}
+.pricing-field input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:16px;font-weight:700;color:var(--green);outline:none;font-family:inherit}
+.pricing-field input:focus{border-color:var(--green)}
+.pricing-sub{font-size:11px;color:#888;margin-top:3px}
+.qr-area{background:#f8f8f8;border-radius:var(--radius);padding:16px;text-align:center;margin-bottom:12px;border:1px solid var(--border)}
+.qr-title{font-size:14px;font-weight:700;color:#111;margin-bottom:4px}
+.qr-sub{font-size:12px;color:#888;margin-bottom:12px}
+.qr-url{font-size:13px;font-weight:700;color:var(--green);margin:10px 0}
+.wa-share-btn{width:100%;padding:12px;border:none;border-radius:var(--radius);background:#25D366;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.install-step{font-size:12px;color:#888;padding:7px 0;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;line-height:1.4}
+.install-step:last-child{border:none}
+.lang-option{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.lang-option:active{background:#f8f8f8}
+.lang-option.active-lang{background:var(--green-light)}
+.lang-name{font-size:14px;font-weight:600;color:#111}
+.lang-sample{font-size:11px;color:#888;margin-top:1px}
+.lang-tick{font-size:16px;color:var(--green)}
+.how-step{padding:13px 14px;border-bottom:1px solid #f0f0f0}
+.how-num{width:26px;height:26px;border-radius:50%;background:var(--green);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-bottom:6px}
+.how-title{font-size:14px;font-weight:700;color:#111;margin-bottom:3px}
+.how-text{font-size:13px;color:#888;line-height:1.5}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:700;color:#111;margin-bottom:14px}
+.login-logo{font-size:40px;text-align:center;margin-bottom:8px}
+.login-title{font-size:20px;font-weight:700;text-align:center;color:#111;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;text-align:center;margin-bottom:24px}
+.login-err{background:var(--red-light);color:var(--red);font-size:12px;padding:8px 12px;border-radius:var(--radius-sm);margin-bottom:12px;display:none}
+.limit-wall{background:var(--amber-light);border:2px solid var(--amber);border-radius:var(--radius);padding:16px;margin:16px 12px;text-align:center}
+.limit-wall-icon{font-size:32px;margin-bottom:8px}
+.limit-wall-title{font-size:16px;font-weight:700;color:var(--amber-text);margin-bottom:6px}
+.limit-wall-text{font-size:13px;color:var(--amber-text);margin-bottom:14px;line-height:1.5}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;z-index:300;display:none;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{display:block}
+.near-info{padding:12px 14px;background:#f8f8f8;border-bottom:1px solid var(--border)}
+.all-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #f0f0f0}
+.all-row-left{display:flex;align-items:center;gap:10px}
+.all-name{font-size:13px;font-weight:600;color:#111}
+.all-meta{font-size:11px;color:#888;margin-top:1px}
+.all-row-right{display:flex;align-items:center;gap:7px}
 </style>
 </head>
 <body>
-<div class="app-shell">
-
-<!-- LOADING -->
-<div class="loading-screen" id="loading">
-  <div class="loading-logo">🛒</div>
-  <div class="loading-text">Loading Spaza Market...</div>
-</div>
-
-<!-- MAIN APP (hidden until loaded) -->
-<div id="main-app" style="display:none;flex-direction:column;flex:1">
-
-<!-- TOPBAR -->
-<div class="topbar">
-  <div class="tb-brand">
-    <div class="tb-logo">🛒</div>
-    <div>
-      <div class="tb-name" id="tb-name">Spaza Market</div>
-      <div class="tb-sub" id="tb-sub">Buy &amp; sell near you</div>
+<div id="app">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-logo">🛒</div>
+      <div>
+        <div class="tb-name" id="tb-name">Spaza Market</div>
+        <div class="tb-sub" id="tb-sub">Buy &amp; sell near you</div>
+      </div>
+    </div>
+    <div class="tb-actions">
+      <button class="role-btn active" id="btn-buyer" onclick="setRole('buyer')">Buyer</button>
+      <button class="role-btn" id="btn-seller" onclick="setRole('seller')">Seller</button>
+      <button class="role-btn" id="btn-admin" onclick="handleAdminClick()">
+        🔔 Admin
+        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      </button>
     </div>
   </div>
-  <div class="tb-actions">
-    <button class="role-btn" id="btn-buyer" onclick="setRole('buyer')">
-      <span id="lbl-buyer">Buyer</span>
-    </button>
-    <button class="role-btn" id="btn-seller" onclick="setRole('seller')">
-      <span id="lbl-seller">Seller</span>
-    </button>
-    <button class="role-btn" id="btn-admin" onclick="setRole('admin')">
-      🔔 <span id="lbl-admin">Admin</span>
-      <span class="notif-badge" id="notif-badge" style="display:none">0</span>
-    </button>
-    <button class="info-btn" onclick="showInfo()" title="How to use">ℹ</button>
+  <div class="nav" id="nav-bar"></div>
+  <div class="view" id="main-view"></div>
+</div>
+
+<div class="modal-overlay" id="admin-modal">
+  <div class="modal">
+    <div class="login-logo">🔐</div>
+    <div class="login-title" id="login-title">Admin Login</div>
+    <div class="login-sub">Spaza Market admin access</div>
+    <div class="login-err" id="login-err"></div>
+    <div class="field"><label id="lbl-email">Email</label><input type="email" id="admin-email" placeholder="eagle.electrical01@gmail.com"></div>
+    <div class="field"><label id="lbl-pass">Password</label><input type="password" id="admin-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn-primary" onclick="doLogin()" id="login-btn">Login</button>
+    <button class="btn-secondary" onclick="document.getElementById('admin-modal').classList.remove('open')">Cancel</button>
   </div>
 </div>
 
-<!-- NAV TABS -->
-<div class="nav-tabs" id="nav-tabs"></div>
-
-<!-- CONTENT -->
-<div class="content" id="content"></div>
-
-</div><!-- end main-app -->
-
-<!-- DETAIL MODAL -->
-<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
-  <div class="detail-sheet" id="detail-sheet"></div>
+<div class="modal-overlay" id="howto-modal">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div class="modal-title" id="howto-modal-title" style="margin-bottom:0">How to use</div>
+      <button onclick="document.getElementById('howto-modal').classList.remove('open')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">✕</button>
+    </div>
+    <div id="howto-modal-content"></div>
+  </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-</div><!-- end app-shell -->
-
-<script src="js/firebase-config.js"></script>
 <script src="js/translations.js"></script>
-
-<!-- Firebase SDKs -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, setDoc, getDoc, query, orderBy, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const storage = getStorage(app);
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let lang = localStorage.getItem('spaza_lang') || 'en';
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBD-t4Y9zN_0SO5S27EC_GcZFEsoXSip2s",
+  authDomain: "spaza-market-sa.firebaseapp.com",
+  projectId: "spaza-market-sa",
+  storageBucket: "spaza-market-sa.appspot.com",
+  messagingSenderId: "927673884911",
+  appId: "1:927673884911:web:992f5b818f3da2deaabb1a",
+  measurementId: "G-N2EM0Y5LSY"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+const storage = firebase.storage();
+</script>
+<script>
+window.currentLang = localStorage.getItem('spaza_lang') || 'en';
 let role = 'buyer';
-let activeTab = 0;
+let currentCat = 'All';
 let located = false;
 let userLat = null, userLng = null, radiusKm = 5;
-let currentCat = 'All';
-let searchQ = '';
-let selPayMode = 'Cash';
-let uploadedPhotos = []; // {file, dataUrl}
-let listings = [];
-let notifications = [];
-let revenueItems = [];
-let prices = { ...DEFAULT_PRICES };
+let selectedPay = 'Cash';
+let selectedPhotos = [];
 let adminLoggedIn = false;
+let allListings = [];
+let allNotifs = [];
+let allPayments = [];
+let pricing = {freeListings:2,extraListingFee:30,boost7Price:20,boost30Price:50,badgePrice:99};
 let sellerPhone = localStorage.getItem('spaza_phone') || '';
-let sellerListingCount = 0;
-let currentDetail = null;
 
-// ─── TRANSLATION HELPER ───────────────────────────────────────────────────────
-function t(key) {
-  const T = TRANSLATIONS[lang] || TRANSLATIONS['en'];
-  return T[key] || TRANSLATIONS['en'][key] || key;
+const ADMIN_WA = '0823474794';
+const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️',Other:'📦'};
+const langMeta = [
+  {code:'en',name:'English',sample:'Hello, welcome to Spaza Market'},
+  {code:'af',name:'Afrikaans',sample:'Hallo, welkom by Spaza Mark'},
+  {code:'zu',name:'isiZulu',sample:'Sawubona, siyakwamukela e-Spaza Market'},
+  {code:'xh',name:'isiXhosa',sample:'Molo, wamkelekile e-Spaza Market'},
+  {code:'st',name:'Sesotho',sample:'Lumela, o amohelehile ho Spaza Market'},
+  {code:'tn',name:'Setswana',sample:'Dumela, o amogelwa mo Spaza Market'},
+  {code:'ts',name:'Xitsonga',sample:'Avuxeni, mu amukeriwa eka Spaza Market'},
+  {code:'nso',name:'Sepedi',sample:'Dumela, o amogelwa go Spaza Market'}
+];
+const navTabs = {
+  buyer:['Browse','Near Me','Language','How to Use'],
+  seller:['My Listings','Add Listing','Boost','Get App'],
+  admin:['Notifications','Revenue','All Listings','Pricing']
+};
+
+async function init() {
+  try { pricing = await getPricing(); } catch(e) {}
+  try { await loadListings(); } catch(e) {}
+  applyLang();
+  setRole('buyer');
 }
 
-// ─── FIRESTORE HELPERS ────────────────────────────────────────────────────────
-async function loadPrices() {
-  try {
-    const snap = await getDoc(doc(db, 'settings', 'prices'));
-    if (snap.exists()) prices = { ...DEFAULT_PRICES, ...snap.data() };
-  } catch(e) { /* use defaults */ }
+async function getPricing() {
+  const doc = await db.collection('settings').doc('pricing').get();
+  return doc.exists ? doc.data() : pricing;
 }
 
-async function savePrices(newPrices) {
-  await setDoc(doc(db, 'settings', 'prices'), newPrices);
-  prices = newPrices;
+async function savePricing(p) {
+  await db.collection('settings').doc('pricing').set(p);
 }
 
 async function loadListings() {
-  const q = query(collection(db, 'listings'), orderBy('createdAt', 'desc'));
-  onSnapshot(q, snap => {
-    listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    updateUnreadBadge();
-    if (role === 'buyer' && activeTab === 0) renderContent();
-    if (role === 'seller' && activeTab === 0) renderContent();
-    if (role === 'admin' && activeTab === 2) renderContent();
-  });
+  const snap = await db.collection('listings')
+    .where('active','==',true)
+    .orderBy('boosted','desc')
+    .orderBy('createdAt','desc')
+    .get();
+  allListings = snap.docs.map(d => ({id:d.id,...d.data()}));
 }
 
-async function loadNotifications() {
-  const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
-  onSnapshot(q, snap => {
-    notifications = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    updateUnreadBadge();
-    if (role === 'admin' && activeTab === 0) renderContent();
-  });
+async function loadNotifs() {
+  const snap = await db.collection('boostRequests').orderBy('createdAt','desc').limit(50).get();
+  allNotifs = snap.docs.map(d => ({id:d.id,...d.data()}));
 }
 
-async function loadRevenue() {
-  const q = query(collection(db, 'revenue'), orderBy('createdAt', 'desc'));
-  onSnapshot(q, snap => {
-    revenueItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    if (role === 'admin' && activeTab === 1) renderContent();
-  });
+async function loadPayments() {
+  const snap = await db.collection('payments').orderBy('createdAt','desc').limit(100).get();
+  allPayments = snap.docs.map(d => ({id:d.id,...d.data()}));
 }
 
-function updateUnreadBadge() {
-  const unread = notifications.filter(n => !n.done && n.unread).length;
+function updateNotifBadge() {
   const badge = document.getElementById('notif-badge');
-  if (badge) {
-    badge.textContent = unread;
-    badge.style.display = unread > 0 ? 'flex' : 'none';
+  const pending = allNotifs.filter(n => n.status === 'pending').length;
+  if (pending > 0 && adminLoggedIn) {
+    badge.textContent = pending;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
   }
 }
 
-async function addListing(data) {
-  return await addDoc(collection(db, 'listings'), { ...data, createdAt: serverTimestamp() });
+function applyLang() {
+  document.getElementById('tb-name').textContent = t('appName');
+  document.getElementById('tb-sub').textContent = t('appSub');
 }
-
-async function addNotification(data) {
-  return await addDoc(collection(db, 'notifications'), { ...data, unread: true, done: false, createdAt: serverTimestamp() });
-}
-
-async function addRevenue(data) {
-  return await addDoc(collection(db, 'revenue'), { ...data, createdAt: serverTimestamp() });
-}
-
-async function markNotifDone(id) {
-  await updateDoc(doc(db, 'notifications', id), { done: true, unread: false });
-}
-
-async function deleteListing(id) {
-  await deleteDoc(doc(db, 'listings', id));
-}
-
-async function countPhoneListings(phone) {
-  const snap = await getDocs(collection(db, 'listings'));
-  return snap.docs.filter(d => d.data().phone === phone).length;
-}
-
-// ─── PHOTO UPLOAD ─────────────────────────────────────────────────────────────
-async function uploadPhoto(file, listingId, idx) {
-  const storRef = ref(storage, `listings/${listingId}/photo_${idx}_${Date.now()}`);
-  await uploadBytes(storRef, file);
-  return await getDownloadURL(storRef);
-}
-
-// ─── DISTANCE ─────────────────────────────────────────────────────────────────
-function calcDist(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-// ─── ROLE / TAB SYSTEM ───────────────────────────────────────────────────────
-const NAV = {
-  buyer: ['browse', 'nearMe', 'languages', 'howTo'],
-  seller: ['myListings', 'addListing', 'boost', 'getApp'],
-  admin: ['notifications', 'revenue', 'allListings', 'pricing']
-};
 
 function setRole(r) {
-  if (r === 'admin' && !adminLoggedIn) {
-    renderAdminLogin();
-    return;
-  }
   role = r;
-  activeTab = 0;
-  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('btn-' + r).classList.add('active');
-  buildNavTabs();
-  renderContent();
+  ['buyer','seller','admin'].forEach(x => {
+    document.getElementById('btn-'+x).classList.toggle('active', x===r);
+  });
+  buildNav();
+  showTab(0);
 }
 
-function buildNavTabs() {
-  const tabs = NAV[role];
-  const bar = document.getElementById('nav-tabs');
-  bar.innerHTML = tabs.map((key, i) =>
-    `<div class="nav-tab${i === activeTab ? ' active' : ''}" onclick="switchTab(${i})">${t(key)}</div>`
+function buildNav() {
+  const tabs = navTabs[role];
+  document.getElementById('nav-bar').innerHTML = tabs.map((tab,i) =>
+    `<div class="nav-tab${i===0?' active':''}" id="ntab-${i}" onclick="showTab(${i})">${tab}</div>`
   ).join('');
 }
 
-function switchTab(i) {
-  activeTab = i;
-  buildNavTabs();
-  renderContent();
-}
-
-// ─── RENDER ROUTER ───────────────────────────────────────────────────────────
-function renderContent() {
-  const el = document.getElementById('content');
-  const tabs = NAV[role];
-  const tab = tabs[activeTab];
-  if (role === 'buyer') {
-    if (tab === 'browse') el.innerHTML = renderBrowse();
-    if (tab === 'nearMe') el.innerHTML = renderNearMe();
-    if (tab === 'languages') el.innerHTML = renderLanguages();
-    if (tab === 'howTo') el.innerHTML = renderHowTo();
-  } else if (role === 'seller') {
-    if (tab === 'myListings') el.innerHTML = renderMyListings();
-    if (tab === 'addListing') el.innerHTML = renderAddListing();
-    if (tab === 'boost') el.innerHTML = renderBoost(false);
-    if (tab === 'getApp') el.innerHTML = renderGetApp();
+function showTab(i) {
+  document.querySelectorAll('.nav-tab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  const tab = navTabs[role][i];
+  if (role==='buyer') {
+    if (tab==='Browse') renderBrowse();
+    else if (tab==='Near Me') renderNearMe();
+    else if (tab==='Language') renderLanguage();
+    else if (tab==='How to Use') renderHowTo();
+  } else if (role==='seller') {
+    if (tab==='My Listings') renderMyListings();
+    else if (tab==='Add Listing') renderAddListing();
+    else if (tab==='Boost') renderBoost(false);
+    else if (tab==='Get App') renderGetApp();
   } else {
-    if (tab === 'notifications') el.innerHTML = renderAdminNotifs();
-    if (tab === 'revenue') el.innerHTML = renderRevenue();
-    if (tab === 'allListings') el.innerHTML = renderAllListings();
-    if (tab === 'pricing') el.innerHTML = renderPricing();
+    if (tab==='Notifications') renderAdminNotifs();
+    else if (tab==='Revenue') renderAdminRevenue();
+    else if (tab==='All Listings') renderAdminAllListings();
+    else if (tab==='Pricing') renderAdminPricing();
   }
-  attachHandlers();
 }
 
-// ─── BROWSE ──────────────────────────────────────────────────────────────────
-function renderBrowse() {
-  let filtered = [...listings];
-  if (currentCat !== 'All') filtered = filtered.filter(l => l.category === currentCat);
-  if (searchQ) filtered = filtered.filter(l =>
-    l.name.toLowerCase().includes(searchQ) ||
-    (l.area||'').toLowerCase().includes(searchQ)
-  );
-  if (located) {
-    filtered = filtered.map(l => ({
-      ...l,
-      km: (l.lat && l.lng) ? calcDist(userLat, userLng, l.lat, l.lng) : 999
-    })).filter(l => l.km <= radiusKm).sort((a,b) => a.km - b.km);
-  }
-  const sorted = [...filtered.filter(l=>l.boosted), ...filtered.filter(l=>!l.boosted)];
-  const newCount = listings.filter(l => l.isNew).length;
-
-  const cats = ['All','Food','Clothes','Services','Electronics','Furniture'];
-  const catKeys = {All:'allCats',Food:'food',Clothes:'clothes',Services:'services',Electronics:'electronics',Furniture:'furniture'};
-
-  return `
-    ${newCount > 0 ? `<div class="new-banner" onclick="clearNew()"><div class="new-banner-dot"></div>${newCount} ${t('newListingNear')}</div>` : ''}
-    <div class="filter-row">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input id="search-inp" placeholder="${t('search')}" value="${searchQ}" oninput="onSearch(this.value)">
-      </div>
-      <button class="nearme-btn${located?' on':''}" onclick="toggleLocate()" id="nm-btn">${located ? '📍 '+t('located') : '📍 '+t('nearMeBtn')}</button>
-    </div>
-    <div class="cats-row">
-      ${cats.map(c => `<div class="cat-pill${currentCat===c?' active':''}" onclick="setCat('${c}')">${t(catKeys[c])}</div>`).join('')}
-    </div>
-    <div class="listings-grid">
-      ${sorted.length === 0
-        ? `<div class="no-listings"><div class="no-listings-icon">🔍</div>${t('noListings')}</div>`
-        : sorted.map(l => renderCard(l)).join('')}
-    </div>`;
+function setView(html) {
+  document.getElementById('main-view').innerHTML = html;
 }
 
-function renderCard(l) {
-  const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️'};
-  const hasPhotos = l.photos && l.photos.length > 0;
-  const payChip = l.payment==='Cash' ? `<span class="pay-chip chip-cod">${t('cod')}</span>` :
-    l.payment==='SnapScan' ? `<span class="pay-chip chip-snap">${t('snap')}</span>` :
-    `<span class="pay-chip chip-both">${t('codSnap')}</span>`;
-  const kmText = (located && l.km != null && l.km < 999) ? `<span class="card-km">${l.km.toFixed(1)}${t('kmAway')}</span>` : '';
-  return `
-    <div class="listing-card${l.boosted?' boosted':''}${l.verified&&!l.boosted?' verified-card':''}" onclick="openDetail('${l.id}')">
-      <div class="card-photos">
-        ${hasPhotos
-          ? `<img class="card-photo-img" src="${l.photos[0]}" loading="lazy">
-             ${l.photos.length>1?`<div class="card-photo-count">+${l.photos.length-1}</div>`:''}`
-          : `<div class="card-photo-placeholder">${emojis[l.category]||'📦'}</div>`}
-        ${l.boosted ? `<div class="card-tag tag-featured">${t('featured')}</div>` : ''}
-        ${l.verified && !l.boosted ? `<div class="card-tag tag-verified">${t('verified')}</div>` : ''}
-        ${l.isNew && !l.boosted ? `<div class="card-tag tag-new">${t('newTag')}</div>` : ''}
+function getSortedListings(q, cat) {
+  let list = allListings.filter(l => {
+    if (cat && cat !== 'All' && l.category !== cat) return false;
+    if (q) {
+      const ql = q.toLowerCase();
+      if (!l.name.toLowerCase().includes(ql) && !l.area.toLowerCase().includes(ql)) return false;
+    }
+    return true;
+  });
+  if (located && userLat) {
+    list = list.map(l => ({...l, km: calcDist(userLat,userLng,l.lat||-26.2,l.lng||28.0)}))
+      .filter(l => l.km <= radiusKm)
+      .sort((a,b) => a.km - b.km);
+  }
+  return [...list.filter(l=>l.boosted), ...list.filter(l=>!l.boosted)];
+}
+
+function calcDist(lat1,lng1,lat2,lng2) {
+  const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLng=(lng2-lng1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function buildCards(list) {
+  if (!list.length) return `<div class="empty-state" style="grid-column:span 2"><div class="empty-icon">🔍</div>No listings found</div>`;
+  return list.map(l => {
+    const pc = l.payment==='SnapScan'?'pay-snap':l.payment==='Both'?'pay-both':'pay-cod';
+    const pl = l.payment==='SnapScan'?'SnapScan':l.payment==='Both'?'COD+Snap':'COD';
+    const hasPhoto = l.photos && l.photos.length > 0;
+    const imgHtml = hasPhoto ? `<img src="${l.photos[0]}" onerror="this.style.display='none'">` : `<span class="card-emoji">${emojis[l.category]||'📦'}</span>`;
+    const kmHtml = (located && l.km!=null) ? ` <span class="card-km">${l.km.toFixed(1)}km</span>` : '';
+    return `<div class="card${l.boosted?' boosted':''}">
+      <div class="card-img-wrap">${imgHtml}
+        ${l.boosted?`<div class="card-tag tag-boost">${t('featured')}</div>`:''}
+        ${l.verified&&!l.boosted?`<div class="card-tag tag-verify">${t('verified')}</div>`:''}
+        ${l.isNew&&!l.boosted?`<div class="card-tag tag-new">${t('newTag')}</div>`:''}
       </div>
       <div class="card-body">
-        <div class="card-title">${l.name}</div>
-        <div class="card-loc">📍 ${l.area||''} ${kmText}</div>
+        <div class="card-name">${l.name}</div>
+        <div class="card-loc">📍 ${l.area}${kmHtml}</div>
         <div class="card-price">R${l.price}</div>
       </div>
-      <div class="card-footer">
-        ${payChip}
-        <button class="wa-contact" onclick="event.stopPropagation();waContact('${l.phone||''}','${l.name.replace(/'/g,"\\'")}')">
-          ${t('whatsapp')}
-        </button>
+      <div class="card-foot">
+        <span class="pay-pill ${pc}">${pl}</span>
+        <button class="wa-btn" onclick="waContact('${l.phone||''}','${l.name.replace(/'/g,'')}')">${t('whatsapp')}</button>
       </div>
     </div>`;
+  }).join('');
 }
 
-// ─── DETAIL SHEET ────────────────────────────────────────────────────────────
-function openDetail(id) {
-  const l = listings.find(x => x.id === id);
-  if (!l) return;
-  currentDetail = l;
-  const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️'};
-  const hasPhotos = l.photos && l.photos.length > 0;
-  document.getElementById('detail-sheet').innerHTML = `
-    <div class="detail-header">
-      <div style="font-size:14px;font-weight:700;color:#1a1a1a">${l.name}</div>
-      <button class="detail-close" onclick="closeDetail()">✕</button>
+function renderBrowse() {
+  const newCount = allListings.filter(l=>l.isNew).length;
+  setView(`
+    <div class="filter-bar">
+      <input class="search-box" placeholder="${t('search')}" oninput="filterBrowse(this.value)" id="browse-search">
+      <button class="near-btn${located?' on':''}" onclick="doNearMe()" id="near-btn">📍 ${located?t('located'):t('nearMeBtn')}</button>
+      <button class="info-btn" onclick="openHowTo()">i</button>
     </div>
-    <div class="detail-photos">
-      ${hasPhotos
-        ? l.photos.map(p => `<div class="detail-photo"><img src="${p}" loading="lazy"></div>`).join('')
-        : `<div class="detail-photo"><div class="detail-photo-placeholder">${emojis[l.category]||'📦'}</div></div>`}
+    <div class="cat-bar">
+      ${['All','Food','Clothes','Services','Electronics','Furniture','Other'].map(c =>
+        `<div class="cat-pill${c===currentCat?' active':''}" onclick="setCat('${c}')">${c}</div>`
+      ).join('')}
     </div>
-    <div class="detail-info">
-      <div class="detail-price">R${l.price}</div>
-      <div class="detail-title">${l.name}</div>
-      <div class="detail-meta">📍 ${l.area||''} · ${l.category||''} · ${l.payment||'Cash'}</div>
-      <div class="detail-desc">${l.description||''}</div>
-    </div>
-    <button class="detail-wa-btn" onclick="waContact('${l.phone||''}','${l.name.replace(/'/g,"\\'")}')">
-      💬 ${t('whatsapp')} ${l.sellerName||'seller'}
-    </button>
-    <div class="bottom-spacer"></div>`;
-  document.getElementById('detail-overlay').classList.add('open');
+    ${newCount>0?`<div class="new-banner">🔔 ${newCount} new listing${newCount>1?'s':''} near you</div>`:''}
+    <div class="grid" id="listing-grid">${buildCards(getSortedListings('',currentCat))}</div>
+  `);
 }
 
-function closeDetail(e) {
-  if (!e || e.target === document.getElementById('detail-overlay')) {
-    document.getElementById('detail-overlay').classList.remove('open');
-  }
+function filterBrowse(q) {
+  const g = document.getElementById('listing-grid');
+  if (g) g.innerHTML = buildCards(getSortedListings(q, currentCat));
 }
 
-// ─── NEAR ME ─────────────────────────────────────────────────────────────────
-function renderNearMe() {
-  return `
-    <div class="form-section">
-      <div class="nm-section">
-        <div class="nm-title">📍 ${t('nearMeBtn')}</div>
-        <button class="btn-primary${located?' ':''}${located?'style="background:#1a7a4a"':''}" 
-          onclick="toggleLocate()" style="${located?'background:#1a7a4a':''}" id="nm-main-btn">
-          ${located ? '✓ '+t('located')+' — '+t('within')+' '+radiusKm+'km' : t('nearMeBtn')}
-        </button>
-        <div class="nm-tip" style="margin-top:10px">${located ? '✓ Listings are sorted by distance from your location.' : 'Tap the button to allow location access. Listings will sort from closest to furthest.'}</div>
-      </div>
-      <div class="nm-section">
-        <div class="nm-title">${t('within')}</div>
-        <div class="radius-row">
-          <span style="font-size:11px;color:#aaa">1km</span>
-          <input type="range" class="radius-slider" min="1" max="20" step="1" value="${radiusKm}" 
-            oninput="updateRadius(this.value)" id="radius-inp">
-          <span style="font-size:11px;color:#aaa">20km</span>
-          <span class="radius-val" id="radius-val">${radiusKm}km</span>
-        </div>
-      </div>
-      <div class="nm-section">
-        <div class="nm-title" style="margin-bottom:6px">How it works</div>
-        ${['App reads your GPS automatically','Listings sort from closest to furthest','Distance shows on every listing card','Only listings within your chosen radius appear'].map(s =>
-          `<div class="install-step"><span class="install-num">✓</span>${s}</div>`).join('')}
-      </div>
-    </div>`;
+function setCat(cat) {
+  currentCat = cat;
+  renderBrowse();
 }
 
-// ─── LANGUAGES ───────────────────────────────────────────────────────────────
-function renderLanguages() {
-  const langs = [
-    {code:'en',name:'English',greeting:'Hello, welcome to Spaza Market'},
-    {code:'af',name:'Afrikaans',greeting:'Hallo, welkom by Spaza Mark'},
-    {code:'zu',name:'isiZulu',greeting:'Sawubona, siyakwamukela e-Spaza Imakethe'},
-    {code:'xh',name:'isiXhosa',greeting:'Molo, wamkelekile e-Spaza Imarike'},
-    {code:'st',name:'Sesotho',greeting:'Lumela, o amohelehile ho Spaza Mmaraka'},
-    {code:'tn',name:'Setswana',greeting:'Dumela, o amogelwa mo Spaza Mmaraka'},
-    {code:'ts',name:'Xitsonga',greeting:'Avuxeni, mu amukeriwa eka Spaza Mahlatse'},
-    {code:'nso',name:'Sepedi',greeting:'Dumela, o amogelwa go Spaza Mmaraka'}
-  ];
-  return `
-    <div class="form-section">
-      <div style="font-size:12px;color:#888;margin-bottom:10px">${t('selectLang')}</div>
-      ${langs.map(l => `
-        <div class="lang-item${lang===l.code?' active-lang':''}" onclick="setLang('${l.code}')">
-          <div>
-            <div class="lang-name">${l.name}</div>
-            <div class="lang-greeting">${l.greeting}</div>
-          </div>
-          ${lang===l.code ? `<span class="lang-check">✓</span>` : ''}
-        </div>`).join('')}
-    </div>`;
-}
-
-// ─── HOW TO USE ───────────────────────────────────────────────────────────────
-function renderHowTo() {
-  const steps = t('howToSteps');
-  return `
-    <div class="form-section">
-      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:12px">${t('howToTitle')}</div>
-      ${steps.map((s,i) => `
-        <div class="howto-item">
-          <div class="howto-header">
-            <div class="howto-num">${i+1}</div>
-            <div class="howto-title">${s.title}</div>
-          </div>
-          <div class="howto-body">${s.body}</div>
-        </div>`).join('')}
-    </div>`;
-}
-
-// ─── MY LISTINGS ─────────────────────────────────────────────────────────────
-function renderMyListings() {
-  const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️'};
-  const mine = listings.filter(l => l.phone === sellerPhone);
-  return `
-    <div class="form-section">
-      <div style="font-size:12px;color:#888;margin-bottom:10px">${t('myListingsTitle')} (${mine.length})</div>
-      ${mine.length === 0
-        ? `<div style="text-align:center;padding:30px;color:#aaa;font-size:13px">No listings yet. Tap "Add Listing" to start.</div>`
-        : mine.map(l => `
-          <div class="my-listing-item">
-            <div class="mli-left">
-              <div class="mli-icon">
-                ${l.photos&&l.photos[0] ? `<img src="${l.photos[0]}">` : emojis[l.category]||'📦'}
-              </div>
-              <div>
-                <div class="mli-name">${l.name}</div>
-                <div class="mli-meta">R${l.price} · ${l.area||''}</div>
-              </div>
-            </div>
-            <div class="mli-right">
-              <span class="status-pill ${l.boosted?'pill-boosted':'pill-live'}">${l.boosted?t('boosted'):t('live')}</span>
-              <button class="small-btn" onclick="confirmRemove('${l.id}')">${t('remove')}</button>
-            </div>
-          </div>`).join('')}
-      <div style="margin-top:8px">
-        <button class="btn-secondary" onclick="switchTab(1)">+ ${t('addListing')}</button>
-      </div>
-    </div>`;
-}
-
-// ─── ADD LISTING ──────────────────────────────────────────────────────────────
-function renderAddListing() {
-  return `
-    <div class="form-section">
-      <div class="form-card">
-        <div class="form-title">${t('addListing')}</div>
-        <div class="field-group">
-          <label class="field-label">${t('whatsappNum')}</label>
-          <input class="field-input" id="f-phone" type="tel" placeholder="e.g. 0821234567" value="${sellerPhone}" oninput="sellerPhone=this.value;localStorage.setItem('spaza_phone',this.value)">
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('listingName')}</label>
-          <input class="field-input" id="f-name" placeholder="e.g. Fresh vetkoek x6">
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('category')}</label>
-          <select class="field-select field-input" id="f-cat">
-            <option value="Food">${t('food')}</option>
-            <option value="Clothes">${t('clothes')}</option>
-            <option value="Services">${t('services')}</option>
-            <option value="Electronics">${t('electronics')}</option>
-            <option value="Furniture">${t('furniture')}</option>
-          </select>
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('price')}</label>
-          <input class="field-input" id="f-price" type="number" inputmode="numeric" placeholder="e.g. 35">
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('area')}</label>
-          <input class="field-input" id="f-area" placeholder="e.g. Zone 3, Soweto">
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('description')}</label>
-          <textarea class="field-textarea" id="f-desc" placeholder="Tell buyers what you are selling..."></textarea>
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('paymentAccepted')}</label>
-          <div class="pay-opts">
-            <div class="pay-opt sel" id="po-cash" onclick="selPay('Cash',this)">${t('cash')}</div>
-            <div class="pay-opt" id="po-snap" onclick="selPay('SnapScan',this)">${t('snapscan')}</div>
-            <div class="pay-opt" id="po-both" onclick="selPay('Both',this)">${t('both')}</div>
-          </div>
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('photoSection')} (${t('uploadPhotos')})</label>
-          <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
-            <div class="photo-upload-icon">📷</div>
-            <div class="photo-upload-text">${t('addPhotos')}</div>
-            <div class="photo-upload-sub">JPG, PNG · max 5MB each</div>
-          </div>
-          <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotoSelect(event)">
-          <div class="photos-preview" id="photos-preview"></div>
-        </div>
-        <button class="btn-primary" id="submit-listing-btn" onclick="submitListing()">${t('listFree')}</button>
-      </div>
-    </div>`;
-}
-
-// ─── BOOST ───────────────────────────────────────────────────────────────────
-function renderBoost(isPaywall) {
-  return `
-    ${isPaywall ? `
-      <div class="paywall-header">
-        <div class="paywall-icon">⚡</div>
-        <div class="paywall-title">${t('freeListingsUsed')}</div>
-        <div class="paywall-sub">${t('freeListingsSub')}</div>
-      </div>` : ''}
-    <div class="form-section">
-      ${!isPaywall ? `<div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px">${t('boostTitle')}</div>
-      <div style="font-size:12px;color:#888;margin-bottom:12px">${t('boostSub')}</div>` : ''}
-      <div class="boost-plan-card" onclick="requestBoost('${t('boost7')}','${prices.boost7Price}','airtime')">
-        <div>
-          <div class="bpc-title">${t('boost7')}</div>
-          <div class="bpc-sub">${t('boostAirtime')}</div>
-        </div>
-        <div>
-          <div class="bpc-price">R${prices.boost7Price}</div>
-          <div class="bpc-how">${t('tapToRequest')}</div>
-        </div>
-      </div>
-      <div class="boost-plan-card" onclick="requestBoost('${t('boost30')}','${prices.boost30Price}','snapscan')">
-        <div>
-          <div class="bpc-title">${t('boost30')}</div>
-          <div class="bpc-sub">${t('boostSnapscan')}</div>
-        </div>
-        <div>
-          <div class="bpc-price">R${prices.boost30Price}</div>
-          <div class="bpc-how">${t('tapToRequest')}</div>
-        </div>
-      </div>
-      <div class="boost-plan-card" onclick="requestBoost('${t('boostVerified')}','${prices.verifiedPrice}','monthly')">
-        <div>
-          <div class="bpc-title">${t('boostVerified')}</div>
-          <div class="bpc-sub">${t('boostMonthly')}</div>
-        </div>
-        <div>
-          <div class="bpc-price">R${prices.verifiedPrice}<span style="font-size:10px;font-weight:500">/mo</span></div>
-          <div class="bpc-how">${t('tapToRequest')}</div>
-        </div>
-      </div>
-      <div class="boost-info-box">
-        <div class="bib-title">${t('boostHow')}</div>
-        <div class="bib-step">${t('boostStep1')}</div>
-        <div class="bib-step">${t('boostStep2')}</div>
-        <div class="bib-step">${t('boostStep3')}</div>
-        <div class="bib-step">${t('boostStep4')}</div>
-      </div>
-    </div>`;
-}
-
-// ─── GET APP ─────────────────────────────────────────────────────────────────
-function renderGetApp() {
-  const qrPattern = [1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,1,1,1,0,1,1,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,1,0,1,0,1,1,1,0,0,0,1,1,0,1,0,0,0,0,1,0,1,0,0,1,0,0,0,1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,0,0,0,0,0,0,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,1,0,1,0,0,0,1];
-  const steps = t('installSteps');
-  return `
-    <div class="form-section">
-      <div class="qr-section">
-        <div class="qr-title">${t('getAppTitle')}</div>
-        <div class="qr-sub">${t('getAppSub')}</div>
-        <div class="qr-svg">
-          <svg width="140" height="140" viewBox="0 0 150 150" xmlns="http://www.w3.org/2000/svg">
-            <rect width="150" height="150" fill="white"/>
-            ${qrPattern.map((b,i) => b ? `<rect x="${(i%12)*11+5}" y="${Math.floor(i/12)*11+5}" width="10" height="10" fill="#1a1a1a"/>` : '').join('')}
-            <rect x="5" y="5" width="44" height="44" rx="3" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-            <rect x="101" y="5" width="44" height="44" rx="3" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-            <rect x="5" y="101" width="44" height="44" rx="3" fill="none" stroke="#1a1a1a" stroke-width="3"/>
-          </svg>
-        </div>
-        <div class="qr-url">${APP_URL}</div>
-        <button class="btn-primary" onclick="shareAppLink()">📱 ${t('shareLink')}</button>
-      </div>
-      <div class="form-card">
-        <div class="form-title">${t('installTitle')}</div>
-        ${steps.map((s,i) => `<div class="install-step"><span class="install-num">${i+1}</span>${s.replace(/^\d+\.\s*/,'')}</div>`).join('')}
-      </div>
-    </div>`;
-}
-
-// ─── ADMIN LOGIN ──────────────────────────────────────────────────────────────
-function renderAdminLogin() {
-  document.getElementById('content').innerHTML = `
-    <div class="admin-login-wrap">
-      <div class="admin-login-icon">🔐</div>
-      <div class="admin-login-title">${t('adminLogin')}</div>
-      <div class="admin-login-sub">${t('enterPassword')}</div>
-      <div class="admin-login-card">
-        <div class="login-error" id="login-error">${t('loginError')}</div>
-        <div class="field-group">
-          <label class="field-label">${t('emailLabel')}</label>
-          <input class="field-input" id="login-email" type="email" placeholder="${ADMIN_EMAIL}" value="${ADMIN_EMAIL}">
-        </div>
-        <div class="field-group">
-          <label class="field-label">${t('passwordLabel')}</label>
-          <input class="field-input" id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-        </div>
-        <button class="btn-primary" onclick="doLogin()">${t('loginBtn')}</button>
-      </div>
-    </div>`;
-  // clear nav tabs for login screen
-  document.getElementById('nav-tabs').innerHTML = '';
-}
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const err = document.getElementById('login-error');
-  err.style.display = 'none';
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    adminLoggedIn = true;
-    setRole('admin');
-  } catch(e) {
-    err.style.display = 'block';
-  }
-}
-
-// ─── ADMIN NOTIFS ─────────────────────────────────────────────────────────────
-function renderAdminNotifs() {
-  const unread = notifications.filter(n => !n.done && n.unread).length;
-  const totalRev = revenueItems.reduce((s,r) => s + (r.amount||0), 0);
-  return `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-num">${listings.length}</div><div class="stat-lbl">${t('statsListings')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${unread}</div><div class="stat-lbl">${t('statsPending')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${totalRev}</div><div class="stat-lbl">${t('statsRevenue')}</div></div>
-    </div>
-    <div class="section-content">
-      <div class="section-hdr">${t('notifications')} ${unread > 0 ? `(${unread} ${t('pendingNotifs')})` : ''}</div>
-      ${notifications.length === 0
-        ? `<div style="text-align:center;padding:30px;color:#aaa;font-size:13px">No notifications yet</div>`
-        : notifications.map(n => `
-          <div class="notif-item ${!n.done && n.unread ? (n.type==='boost'?'unread-boost':n.type==='payment'?'unread-pay':'unread-new') : ''}">
-            <div class="notif-top">
-              <div class="notif-title-text">${n.type==='boost'?'⚡':n.type==='payment'?'💰':'🆕'} ${n.title||''}</div>
-              <div class="notif-time">${n.timeLabel||''}</div>
-            </div>
-            <div class="notif-body-text">${n.body||''}</div>
-            ${!n.done ? `
-              <div class="notif-btns">
-                ${n.type==='boost' ? `<button class="notif-btn nb-amber" onclick="sendPayLink('${n.id}','${(n.sellerPhone||'').replace(/'/g,"\\'")}','${(n.plan||'').replace(/'/g,"\\'")}','${(n.sellerName||'').replace(/'/g,"\\'")}')">📱 ${t('sendPayLink')}</button>` : ''}
-                <button class="notif-btn nb-gray" onclick="dismissNotif('${n.id}')">${t('dismiss')}</button>
-              </div>` : `<div class="done-text">✓ ${t('done')}</div>`}
-          </div>`).join('')}
-      <div class="logout-row">
-        <button class="logout-btn" onclick="adminLogout()">🚪 ${t('logout')}</button>
-      </div>
-    </div>`;
-}
-
-// ─── REVENUE ─────────────────────────────────────────────────────────────────
-function renderRevenue() {
-  const total = revenueItems.reduce((s,r) => s + (r.amount||0), 0);
-  return `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${total}</div><div class="stat-lbl">${t('thisMonth')}</div></div>
-      <div class="stat-card"><div class="stat-num">${revenueItems.length}</div><div class="stat-lbl">${t('payments')}</div></div>
-      <div class="stat-card"><div class="stat-num">${listings.filter(l=>l.boosted).length}</div><div class="stat-lbl">${t('boosted')}</div></div>
-    </div>
-    <div class="section-content">
-      <div class="section-hdr">${t('revenueTitle')}</div>
-      ${revenueItems.length === 0
-        ? `<div style="text-align:center;padding:30px;color:#aaa;font-size:13px">No revenue yet</div>`
-        : `<div class="revenue-list">
-          ${revenueItems.map(r => `
-            <div class="rev-row">
-              <div>
-                <div class="rev-label">${r.label||''}</div>
-                <div class="rev-sub-text">${r.sub||''}</div>
-              </div>
-              <div class="rev-amount">R${r.amount||0}</div>
-            </div>`).join('')}
-          </div>`}
-    </div>`;
-}
-
-// ─── ALL LISTINGS (ADMIN) ────────────────────────────────────────────────────
-function renderAllListings() {
-  const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️'};
-  return `
-    <div class="section-content" style="padding-top:8px">
-      ${listings.map(l => `
-        <div class="my-listing-item">
-          <div class="mli-left">
-            <div class="mli-icon">
-              ${l.photos&&l.photos[0] ? `<img src="${l.photos[0]}">` : emojis[l.category]||'📦'}
-            </div>
-            <div>
-              <div class="mli-name">${l.name}</div>
-              <div class="mli-meta">${l.phone||'unknown'} · R${l.price} · ${l.area||''}</div>
-            </div>
-          </div>
-          <div class="mli-right">
-            <span class="status-pill ${l.boosted?'pill-boosted':'pill-live'}">${l.boosted?t('boosted'):t('live')}</span>
-            <button class="small-btn" onclick="adminRemoveListing('${l.id}')">${t('remove')}</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
-// ─── PRICING ─────────────────────────────────────────────────────────────────
-function renderPricing() {
-  return `
-    <div class="form-section">
-      <div class="form-card">
-        <div class="form-title">${t('pricingTitle')}</div>
-        <div style="font-size:12px;color:#888;margin-bottom:14px">${t('pricingSub')}</div>
-        <div class="pricing-field">
-          <label class="pricing-label">${t('freeListingsAllowed')}</label>
-          <input class="pricing-input" type="number" id="p-free" value="${prices.freeListingsAllowed}">
-        </div>
-        <div class="pricing-field">
-          <label class="pricing-label">${t('extraListingFee')}</label>
-          <input class="pricing-input" type="number" id="p-extra" value="${prices.extraListingFee}">
-        </div>
-        <div class="pricing-field">
-          <label class="pricing-label">${t('boost7Price')}</label>
-          <input class="pricing-input" type="number" id="p-boost7" value="${prices.boost7Price}">
-        </div>
-        <div class="pricing-field">
-          <label class="pricing-label">${t('boost30Price')}</label>
-          <input class="pricing-input" type="number" id="p-boost30" value="${prices.boost30Price}">
-        </div>
-        <div class="pricing-field">
-          <label class="pricing-label">${t('verifiedPrice')}</label>
-          <input class="pricing-input" type="number" id="p-verified" value="${prices.verifiedPrice}">
-        </div>
-        <button class="btn-primary" onclick="savePricingForm()">${t('savePrice')}</button>
-      </div>
-    </div>`;
-}
-
-// ─── ACTIONS ─────────────────────────────────────────────────────────────────
-function onSearch(v) { searchQ = v.toLowerCase(); renderContent(); }
-function setCat(c) { currentCat = c; renderContent(); }
-function selPay(v, el) {
-  selPayMode = v;
-  document.querySelectorAll('.pay-opt').forEach(p => p.classList.remove('sel'));
-  el.classList.add('sel');
-}
-
-function toggleLocate() {
-  if (located) { located = false; userLat = null; userLng = null; renderContent(); return; }
-  if (!navigator.geolocation) { showToast('GPS not available on this device'); return; }
-  document.getElementById('nm-btn') && (document.getElementById('nm-btn').textContent = '⏳ Locating...');
+function doNearMe() {
+  if (located) { located=false; userLat=null; userLng=null; renderBrowse(); return; }
+  const btn = document.getElementById('near-btn');
+  if (btn) { btn.textContent='📍 Locating...'; btn.disabled=true; }
   navigator.geolocation.getCurrentPosition(pos => {
-    userLat = pos.coords.latitude;
-    userLng = pos.coords.longitude;
-    located = true;
-    renderContent();
-    showToast('Located! Showing listings within ' + radiusKm + 'km');
+    userLat=pos.coords.latitude; userLng=pos.coords.longitude; located=true;
+    renderBrowse(); showToast('Located — within '+radiusKm+'km');
   }, () => {
-    showToast('Could not get location. Please allow GPS access.');
+    userLat=-26.195; userLng=28.034; located=true;
+    renderBrowse(); showToast('Using approximate location');
   });
 }
 
-function updateRadius(v) {
-  radiusKm = parseInt(v);
-  const el = document.getElementById('radius-val');
-  if (el) el.textContent = v + 'km';
-  if (located) renderContent();
+function waContact(phone, item) {
+  if (!phone) { showToast('No WhatsApp number for this seller'); return; }
+  const msg = encodeURIComponent(`Hi, I saw your listing on Spaza Market: *${item}*. Is it still available?`);
+  window.open(`https://wa.me/27${phone.replace(/^0/,'')}?text=${msg}`, '_blank');
+}
+
+function renderNearMe() {
+  setView(`
+    <div class="form-wrap">
+      <div class="info-box green" style="margin-bottom:16px">
+        <div class="info-box-title">📍 Near Me</div>
+        <div class="info-box-body">Sort listings closest to you. Only see items within walking or taxi distance.</div>
+      </div>
+      <button class="btn-primary" onclick="doNearMe();setRole('buyer')" style="margin-bottom:12px">${located?'Reset location':'Find my location'}</button>
+      ${located?`<div style="text-align:center;font-size:12px;color:var(--green);font-weight:600;margin-bottom:16px">✓ Location found</div>`:''}
+      <div class="field"><label>Radius</label></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <span style="font-size:12px;color:#888">1km</span>
+        <input type="range" min="1" max="10" step="1" value="${radiusKm}" style="flex:1" oninput="radiusKm=parseInt(this.value);document.getElementById('km-out').textContent=this.value+'km'">
+        <span style="font-size:12px;color:#888">10km</span>
+        <span style="font-size:13px;font-weight:700;min-width:36px" id="km-out">${radiusKm}km</span>
+      </div>
+      ${['GPS reads your location automatically','Listings sorted by distance — closest first','Distance shown in km on each card','Radius slider filters how far listings show'].map(s=>`<div class="install-step"><span style="color:var(--green);font-weight:700">✓</span>${s}</div>`).join('')}
+    </div>`);
+}
+
+function renderLanguage() {
+  setView(`
+    <div style="padding:10px 0 6px 14px;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px">Select your language</div>
+    ${langMeta.map(l => `
+      <div class="lang-option${l.code===window.currentLang?' active-lang':''}" onclick="setLang('${l.code}')">
+        <div><div class="lang-name">${l.name}</div><div class="lang-sample">${l.sample}</div></div>
+        ${l.code===window.currentLang?'<span class="lang-tick">✓</span>':''}
+      </div>`).join('')}`);
 }
 
 function setLang(code) {
-  lang = code;
+  window.currentLang = code;
   localStorage.setItem('spaza_lang', code);
-  document.getElementById('tb-name').textContent = t('appName');
-  document.getElementById('tb-sub').textContent = t('appSub');
-  document.getElementById('lbl-buyer').textContent = t('buyer');
-  document.getElementById('lbl-seller').textContent = t('seller');
-  document.getElementById('lbl-admin').textContent = t('admin');
-  buildNavTabs();
-  renderContent();
+  applyLang();
+  renderLanguage();
+  showToast(langMeta.find(l=>l.code===code).name + ' selected');
 }
 
-function handlePhotoSelect(e) {
-  const files = Array.from(e.target.files);
-  const remaining = 5 - uploadedPhotos.length;
-  const toAdd = files.slice(0, remaining);
+function renderHowTo() {
+  const steps = [
+    [t('howToStep1Title'),t('howToStep1')],
+    [t('howToStep2Title'),t('howToStep2')],
+    [t('howToStep3Title'),t('howToStep3')],
+    [t('howToStep4Title'),t('howToStep4')],
+    [t('howToStep5Title'),t('howToStep5')],
+    [t('howToStep6Title'),t('howToStep6')]
+  ];
+  setView(`
+    <div style="padding:10px 0 4px 14px;font-size:14px;font-weight:700;color:#111">${t('howToTitle')}</div>
+    ${steps.map((s,i) => `<div class="how-step"><div class="how-num">${i+1}</div><div class="how-title">${s[0]}</div><div class="how-text">${s[1]}</div></div>`).join('')}`);
+}
+
+function openHowTo() {
+  const steps = [
+    [t('howToStep1Title'),t('howToStep1')],
+    [t('howToStep2Title'),t('howToStep2')],
+    [t('howToStep3Title'),t('howToStep3')],
+    [t('howToStep4Title'),t('howToStep4')],
+    [t('howToStep5Title'),t('howToStep5')],
+    [t('howToStep6Title'),t('howToStep6')]
+  ];
+  document.getElementById('howto-modal-title').textContent = t('howToTitle');
+  document.getElementById('howto-modal-content').innerHTML = steps.map((s,i) =>
+    `<div class="how-step"><div class="how-num">${i+1}</div><div class="how-title">${s[0]}</div><div class="how-text">${s[1]}</div></div>`
+  ).join('');
+  document.getElementById('howto-modal').classList.add('open');
+}
+
+async function renderMyListings() {
+  if (!sellerPhone) { setView(phonePrompt('renderMyListings()')); return; }
+  const myList = allListings.filter(l => l.phone === sellerPhone);
+  setView(`
+    <div class="section-head">Your listings (${myList.length})</div>
+    ${myList.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>No listings yet</div>`:''}
+    ${myList.map(l => `
+      <div class="my-row">
+        <div class="my-icon">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}">`:emojis[l.category]||'📦'}</div>
+        <div class="my-info"><div class="my-name">${l.name}</div><div class="my-meta">R${l.price} · ${l.area}</div></div>
+        <div class="my-right">
+          <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?'Boosted':'Live'}</span>
+          <button class="action-btn red" onclick="doRemove('${l.id}')">Remove</button>
+        </div>
+      </div>`).join('')}
+    <div style="padding:12px"><button class="btn-primary" onclick="showTab(1)">+ Add listing</button></div>`);
+}
+
+function phonePrompt(cb) {
+  return `<div class="form-wrap">
+    <div class="info-box"><div class="info-box-title">Enter your WhatsApp number</div><div class="info-box-body">We use your number to track your listings. No account needed.</div></div>
+    <div class="field"><label>Your WhatsApp number</label><input type="tel" id="sp-input" placeholder="e.g. 0821234567" value="${sellerPhone}"></div>
+    <button class="btn-primary" onclick="savePhone(${cb?`'${cb}'`:''})">Continue</button>
+  </div>`;
+}
+
+function savePhone(cb) {
+  const val = document.getElementById('sp-input')?.value?.trim();
+  if (!val||val.length<9) { showToast('Please enter a valid number'); return; }
+  sellerPhone = val;
+  localStorage.setItem('spaza_phone', val);
+  if (cb) eval(cb);
+}
+
+async function renderAddListing() {
+  if (!sellerPhone) { setView(phonePrompt('renderAddListing()')); return; }
+  const count = allListings.filter(l => l.phone === sellerPhone).length;
+  if (count >= pricing.freeListings) {
+    setView(`<div class="limit-wall">
+      <div class="limit-wall-icon">🔒</div>
+      <div class="limit-wall-title">Free listings used</div>
+      <div class="limit-wall-text">You have used all ${pricing.freeListings} free listings. Choose a plan to continue.</div>
+    </div>`);
+    renderBoost(true);
+    return;
+  }
+  selectedPhotos = [];
+  selectedPay = 'Cash';
+  setView(`
+    <div class="form-wrap">
+      <div class="field">
+        <label>Photos (up to 5)</label>
+        <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+          <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(this.files)" style="display:none">
+          <div style="font-size:24px;margin-bottom:6px">📷</div>
+          <div style="font-size:12px;color:#888">Tap to add photos</div>
+        </div>
+        <div class="photo-row" id="photo-row"></div>
+      </div>
+      <div class="field"><label>Item name *</label><input type="text" id="f-name" placeholder="e.g. Fresh vetkoek x6"></div>
+      <div class="field"><label>Category</label><select id="f-cat">${['Food','Clothes','Services','Electronics','Furniture','Other'].map(c=>`<option>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Price (R) *</label><input type="number" id="f-price" placeholder="e.g. 35" inputmode="numeric"></div>
+      <div class="field"><label>Your area / street *</label><input type="text" id="f-area" placeholder="e.g. Zone 3, Soweto"></div>
+      <div class="field"><label>WhatsApp number *</label><input type="tel" id="f-phone" value="${sellerPhone}" placeholder="e.g. 0821234567"></div>
+      <div class="field"><label>Description</label><textarea id="f-desc" placeholder="Tell buyers what you are selling..."></textarea></div>
+      <div class="field">
+        <label>Payment accepted</label>
+        <div class="pay-opts">
+          <div class="pay-opt sel" id="po-cash" onclick="selPayOpt('Cash')">Cash</div>
+          <div class="pay-opt" id="po-snap" onclick="selPayOpt('SnapScan')">SnapScan</div>
+          <div class="pay-opt" id="po-both" onclick="selPayOpt('Both')">Both</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#888;margin-bottom:10px">${pricing.freeListings-count} free listing${pricing.freeListings-count!==1?'s':''} remaining</div>
+      <button class="btn-primary" onclick="submitListing()">List Item — Free</button>
+    </div>`);
+}
+
+function handlePhotos(files) {
+  const remaining = 5 - selectedPhotos.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  if (files.length > remaining) showToast('Maximum 5 photos allowed');
   toAdd.forEach(file => {
+    if (selectedPhotos.length >= 5) return;
     const reader = new FileReader();
-    reader.onload = ev => {
-      uploadedPhotos.push({ file, dataUrl: ev.target.result });
-      renderPhotoPreview();
-    };
+    reader.onload = e => { selectedPhotos.push({file, dataUrl:e.target.result}); renderPhotoRow(); };
     reader.readAsDataURL(file);
   });
-  if (files.length > remaining) showToast('Max 5 photos allowed');
 }
 
-function renderPhotoPreview() {
-  const el = document.getElementById('photos-preview');
-  if (!el) return;
-  el.innerHTML = uploadedPhotos.map((p,i) => `
+function renderPhotoRow() {
+  const row = document.getElementById('photo-row');
+  if (!row) return;
+  row.innerHTML = selectedPhotos.map((p,i) => `
     <div class="photo-thumb">
       <img src="${p.dataUrl}">
-      <button class="photo-remove" onclick="removePhoto(${i})">✕</button>
+      <button class="photo-rm" onclick="removePhoto(${i})">✕</button>
     </div>`).join('');
 }
 
-function removePhoto(i) {
-  uploadedPhotos.splice(i, 1);
-  renderPhotoPreview();
+function removePhoto(i) { selectedPhotos.splice(i,1); renderPhotoRow(); }
+
+function selPayOpt(val) {
+  selectedPay = val;
+  ['cash','snap','both'].forEach(k => document.getElementById('po-'+k)?.classList.remove('sel'));
+  const map = {Cash:'cash',SnapScan:'snap',Both:'both'};
+  document.getElementById('po-'+map[val])?.classList.add('sel');
 }
 
 async function submitListing() {
-  const phone = (document.getElementById('f-phone').value||'').trim();
-  const name = (document.getElementById('f-name').value||'').trim();
-  const price = parseInt(document.getElementById('f-price').value||0);
-  const area = (document.getElementById('f-area').value||'').trim();
-  const desc = (document.getElementById('f-desc').value||'').trim();
-  const cat = document.getElementById('f-cat').value;
-
-  if (!phone || !name || !price || !area) { showToast('Please fill in all required fields'); return; }
-  if (phone.length < 10) { showToast('Please enter a valid WhatsApp number'); return; }
-
-  const btn = document.getElementById('submit-listing-btn');
-  btn.textContent = 'Saving...'; btn.disabled = true;
-
+  const name = document.getElementById('f-name')?.value?.trim();
+  const price = document.getElementById('f-price')?.value;
+  const area = document.getElementById('f-area')?.value?.trim();
+  const phone = document.getElementById('f-phone')?.value?.trim();
+  const desc = document.getElementById('f-desc')?.value?.trim();
+  const cat = document.getElementById('f-cat')?.value;
+  if (!name||!price||!area||!phone) { showToast('Please fill in all required fields'); return; }
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.textContent='Uploading...'; btn.disabled=true; }
   try {
-    const count = await countPhoneListings(phone);
-    if (count >= prices.freeListingsAllowed) {
-      btn.textContent = t('listFree'); btn.disabled = false;
-      document.getElementById('content').innerHTML = renderBoost(true);
-      return;
-    }
-
-    const listingData = {
-      name, price, area, description: desc, category: cat,
-      payment: selPayMode, phone,
-      sellerName: phone,
-      boosted: false, verified: false, isNew: true,
-      lat: userLat, lng: userLng,
-      photos: []
-    };
-
-    const docRef = await addListing(listingData);
-
-    if (uploadedPhotos.length > 0) {
-      const urls = await Promise.all(uploadedPhotos.map((p, i) => uploadPhoto(p.file, docRef.id, i)));
-      await updateDoc(doc(db, 'listings', docRef.id), { photos: urls });
-    }
-
-    await addNotification({
-      type: 'new', title: t('newListingNotif') + ' — ' + area,
-      body: `${name} listed by ${phone}. Push notification sent to nearby users.`,
-      timeLabel: 'just now', sellerPhone: phone
+    const docRef = await db.collection('listings').add({
+      name, price:parseFloat(price), area, phone, category:cat,
+      payment:selectedPay, description:desc||'', photos:[],
+      active:true, boosted:false, verified:false, isNew:true,
+      lat:userLat||-26.2, lng:userLng||28.0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-
-    uploadedPhotos = [];
+    if (selectedPhotos.length > 0) {
+      const urls = [];
+      for (let i=0; i<selectedPhotos.length; i++) {
+        const ref = storage.ref(`listings/${docRef.id}/photo_${i}`);
+        await ref.put(selectedPhotos[i].file);
+        urls.push(await ref.getDownloadURL());
+      }
+      await db.collection('listings').doc(docRef.id).update({photos:urls});
+    }
     sellerPhone = phone;
     localStorage.setItem('spaza_phone', phone);
-    showToast(t('listingAdded'));
-    setTimeout(() => { switchTab(0); }, 1500);
-  } catch(err) {
-    showToast('Error saving listing. Please try again.');
-    btn.textContent = t('listFree'); btn.disabled = false;
-  }
-}
-
-async function requestBoost(plan, price, method) {
-  const phone = sellerPhone || prompt('Enter your WhatsApp number:');
-  if (!phone) return;
-  sellerPhone = phone;
-  localStorage.setItem('spaza_phone', phone);
-
-  await addNotification({
-    type: 'boost',
-    title: t('boostRequest') + ' — ' + phone,
-    body: `Seller ${phone} wants "${plan}" for R${price}. Send payment link.`,
-    sellerPhone: phone, sellerName: phone, plan: plan + ' — R' + price,
-    timeLabel: 'just now', amount: parseInt(price)
-  });
-  showToast(t('boostRequested'));
-}
-
-async function sendPayLink(notifId, phone, plan, name) {
-  const msg = encodeURIComponent(`Hi! Your Spaza Market boost request has been received.\n\nPlan: ${plan}\n\nPlease pay via SnapScan or Capitec Pay to activate your boost.\n\nThank you!\nSpaza Market`);
-  const waUrl = `https://wa.me/${phone.replace(/^0/,'27').replace(/\D/g,'')}?text=${msg}`;
-  window.open(waUrl, '_blank');
-  await markNotifDone(notifId);
-  const amount = plan.match(/R(\d+)/);
-  if (amount) {
-    await addRevenue({
-      label: t('boostRequest') + ' — ' + (name||phone),
-      sub: 'Paid via WhatsApp link · ' + plan,
-      amount: parseInt(amount[1])
+    await db.collection('boostRequests').add({
+      type:'new', title:`New listing — ${area}`,
+      body:`${name} listed by ${phone}.`,
+      status:'info', createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-  }
-  showToast(t('payLinkSent'));
-}
-
-async function dismissNotif(id) {
-  await markNotifDone(id);
-}
-
-async function confirmRemove(id) {
-  if (confirm(t('confirmRemove'))) {
-    await deleteListing(id);
-    showToast('Listing removed');
+    await loadListings();
+    showToast('Listed! Nearby buyers notified.');
+    setTimeout(() => showTab(0), 1500);
+  } catch(err) {
+    showToast('Error: ' + err.message);
+    if (btn) { btn.textContent='List Item — Free'; btn.disabled=false; }
   }
 }
 
-async function adminRemoveListing(id) {
-  if (confirm(t('confirmRemove'))) {
-    await deleteListing(id);
-    showToast('Listing removed');
+async function doRemove(id) {
+  if (!confirm('Remove this listing?')) return;
+  await db.collection('listings').doc(id).update({active:false});
+  await loadListings();
+  renderMyListings();
+  showToast('Listing removed');
+}
+
+function renderBoost(isPaywall) {
+  const boostHtml = `
+    <div class="form-wrap" style="padding-top:${isPaywall?'4px':'12px'}">
+      <div class="info-box" style="margin-bottom:14px">
+        <div class="info-box-title">How boosting works</div>
+        <div class="info-box-body">1. Tap a plan below<br>2. Admin gets notified on WhatsApp<br>3. You receive a WhatsApp payment link<br>4. Pay — listing boosts automatically</div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('7day','${pricing.boost7Price}')">
+        <div><div class="boost-title">7-day featured boost</div><div class="boost-desc">Pay via airtime — no bank needed</div></div>
+        <div><div class="boost-price">R${pricing.boost7Price}</div><div class="boost-method">Airtime</div></div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('30day','${pricing.boost30Price}')">
+        <div><div class="boost-title">30-day featured boost</div><div class="boost-desc">Pay via SnapScan QR code</div></div>
+        <div><div class="boost-price">R${pricing.boost30Price}</div><div class="boost-method">SnapScan</div></div>
+      </div>
+      <div class="boost-card" onclick="requestBoost('monthly','${pricing.badgePrice}')">
+        <div><div class="boost-title">Verified business badge</div><div class="boost-desc">Monthly — SnapScan or Capitec Pay</div></div>
+        <div><div class="boost-price">R${pricing.badgePrice}/mo</div><div class="boost-method">SnapScan/Capitec</div></div>
+      </div>
+    </div>`;
+  if (isPaywall) {
+    document.getElementById('main-view').innerHTML += boostHtml;
+  } else {
+    setView(boostHtml);
   }
 }
 
-async function savePricingForm() {
-  const newPrices = {
-    freeListingsAllowed: parseInt(document.getElementById('p-free').value)||2,
-    extraListingFee: parseInt(document.getElementById('p-extra').value)||30,
-    boost7Price: parseInt(document.getElementById('p-boost7').value)||20,
-    boost30Price: parseInt(document.getElementById('p-boost30').value)||50,
-    verifiedPrice: parseInt(document.getElementById('p-verified').value)||99
-  };
-  await savePrices(newPrices);
-  showToast(t('pricesSaved'));
+async function requestBoost(plan, price) {
+  if (!sellerPhone) { showToast('Enter your WhatsApp number in My Listings first'); return; }
+  const planNames = {'7day':'7-day boost','30day':'30-day boost',monthly:'Verified badge'};
+  const methods = {'7day':'airtime','30day':'SnapScan',monthly:'SnapScan/Capitec'};
+  try {
+    await db.collection('boostRequests').add({
+      type:'boost', seller:sellerPhone, plan:planNames[plan],
+      price:`R${price}`, method:methods[plan], status:'pending',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await loadNotifs();
+    updateNotifBadge();
+    const msg = encodeURIComponent(`New boost request from ${sellerPhone}: ${planNames[plan]} — R${price} via ${methods[plan]}`);
+    showToast('Boost requested — admin notified on WhatsApp');
+  } catch(e) {
+    showToast('Could not send request. Please try again.');
+  }
 }
 
-function adminLogout() {
-  signOut(auth);
-  adminLoggedIn = false;
-  setRole('buyer');
-}
-
-function waContact(phone, name) {
-  if (!phone) { showToast('Seller has no WhatsApp number'); return; }
-  const clean = phone.replace(/^0/, '27').replace(/\D/g,'');
-  const msg = encodeURIComponent(`Hi, I saw your listing "${name}" on Spaza Market. Is it still available?`);
-  window.open(`https://wa.me/${clean}?text=${msg}`, '_blank');
+function renderGetApp() {
+  setView(`
+    <div class="form-wrap">
+      <div class="qr-area">
+        <div class="qr-title">Get Spaza Market on your phone</div>
+        <div class="qr-sub">No app store needed — installs like an app</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" style="margin:0 auto 10px;display:block">
+          <rect width="120" height="120" fill="white"/>
+          <g fill="black">
+            <rect x="10" y="10" width="40" height="40"/><rect x="15" y="15" width="30" height="30" fill="white"/><rect x="20" y="20" width="20" height="20"/>
+            <rect x="70" y="10" width="40" height="40"/><rect x="75" y="15" width="30" height="30" fill="white"/><rect x="80" y="20" width="20" height="20"/>
+            <rect x="10" y="70" width="40" height="40"/><rect x="15" y="75" width="30" height="30" fill="white"/><rect x="20" y="80" width="20" height="20"/>
+            <rect x="70" y="60" width="8" height="8"/><rect x="82" y="60" width="8" height="8"/><rect x="94" y="60" width="16" height="8"/>
+            <rect x="70" y="72" width="16" height="8"/><rect x="94" y="72" width="16" height="8"/>
+            <rect x="70" y="84" width="8" height="8"/><rect x="82" y="84" width="28" height="8"/>
+            <rect x="70" y="96" width="8" height="8"/><rect x="82" y="96" width="8" height="8"/><rect x="94" y="96" width="16" height="8"/>
+            <rect x="54" y="10" width="8" height="8"/><rect x="54" y="22" width="8" height="16"/><rect x="54" y="42" width="8" height="8"/>
+            <rect x="54" y="54" width="8" height="8"/><rect x="10" y="54" width="36" height="8"/>
+          </g>
+        </svg>
+        <div class="qr-url">eagleelectrical01-blip.github.io/spaza-market</div>
+        <button class="wa-share-btn" onclick="shareAppLink()">Share app link on WhatsApp</button>
+      </div>
+      <div class="section-head">How to install</div>
+      ${['1. Tap the WhatsApp link or scan QR','2. Link opens in your browser','3. Tap menu (3 dots) in your browser','4. Tap "Add to Home Screen"','5. App icon appears on your phone — done!'].map(s=>`<div class="install-step"><span style="color:var(--green);font-weight:700">→</span>${s}</div>`).join('')}
+    </div>`);
 }
 
 function shareAppLink() {
-  const msg = encodeURIComponent(`Buy & sell near you on Spaza Market!\n\nNo app store needed — just tap this link:\n${APP_URL}\n\nTap "Add to Home Screen" to install.`);
+  const msg = encodeURIComponent('Shop and sell near you on Spaza Market 🛒\nNo app store needed — just tap the link:\nhttps://eagleelectrical01-blip.github.io/spaza-market');
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
-function showInfo() {
-  const tab = NAV['buyer'].indexOf('howTo');
-  setRole('buyer');
-  activeTab = tab;
-  buildNavTabs();
-  renderContent();
+function handleAdminClick() {
+  if (adminLoggedIn) { setRole('admin'); return; }
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-pass').value = '';
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('admin-modal').classList.add('open');
 }
 
-function clearNew() {
-  listings.forEach(async l => {
-    if (l.isNew && l.id) await updateDoc(doc(db, 'listings', l.id), { isNew: false });
+async function doLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  btn.textContent = 'Signing in...'; btn.disabled = true;
+  err.style.display = 'none';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+    adminLoggedIn = true;
+    document.getElementById('admin-modal').classList.remove('open');
+    await loadNotifs();
+    await loadPayments();
+    updateNotifBadge();
+    setRole('admin');
+  } catch(e) {
+    err.textContent = 'Incorrect email or password';
+    err.style.display = 'block';
+    btn.textContent = 'Login'; btn.disabled = false;
+  }
+}
+
+async function renderAdminNotifs() {
+  try { await loadNotifs(); } catch(e) {}
+  const pending = allNotifs.filter(n=>n.status==='pending');
+  setView(`
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-num">${allListings.length}</div><div class="stat-lbl">Listings</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${pending.length}</div><div class="stat-lbl">Pending</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0)}</div><div class="stat-lbl">Revenue</div></div>
+    </div>
+    <div class="section-head">Notifications (${pending.length} pending)</div>
+    ${allNotifs.length===0?`<div class="empty-state"><div class="empty-icon">🔔</div>No notifications yet</div>`:''}
+    ${allNotifs.map(n => {
+      const isBoost = n.type==='boost';
+      const isPend = n.status==='pending';
+      const cls = isPend?(isBoost?'unread-boost':'unread-new'):'';
+      const timeStr = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) : 'just now';
+      return `<div class="notif-card ${cls}">
+        <div class="notif-top">
+          <div class="notif-title">${isBoost?'⚡':'🆕'} ${n.title||(isBoost?'Boost request':'New listing')}</div>
+          <div class="notif-time">${timeStr}</div>
+        </div>
+        <div class="notif-body">${n.body||`${n.seller||''} — ${n.plan||''} ${n.price||''}`}</div>
+        ${isPend&&isBoost?`<div class="notif-actions">
+          <button class="notif-btn amber" onclick="sendPayLink('${n.id}','${n.seller||''}','${n.price||''}')">Send payment link</button>
+          <button class="notif-btn gray" onclick="dismissNotif('${n.id}')">Dismiss</button>
+        </div>`:''}
+        ${!isPend?`<div class="notif-done">✓ Done</div>`:''}
+      </div>`;
+    }).join('')}`);
+  updateNotifBadge();
+}
+
+async function sendPayLink(id, phone, price) {
+  const msg = encodeURIComponent(`Hi! Your Spaza Market boost has been received.\n\nAmount: ${price}\n\nPlease pay via SnapScan:\nhttps://pos.snapscan.io/qr/spazamarket\n\nOnce paid your listing will be boosted. — Spaza Market`);
+  window.open(`https://wa.me/27${(phone||ADMIN_WA).replace(/^0/,'')}?text=${msg}`, '_blank');
+  await db.collection('boostRequests').doc(id).update({status:'sent'});
+  await db.collection('payments').add({
+    seller:phone, amount:parseInt((price||'0').replace('R','')),
+    plan:'Boost', method:'SnapScan',
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
+  await loadNotifs(); await loadPayments();
+  renderAdminNotifs();
+  showToast('WhatsApp payment link sent');
+}
+
+async function dismissNotif(id) {
+  await db.collection('boostRequests').doc(id).update({status:'dismissed'});
+  await loadNotifs(); renderAdminNotifs();
+}
+
+async function renderAdminRevenue() {
+  try { await loadPayments(); } catch(e) {}
+  const total = allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0);
+  setView(`
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${total}</div><div class="stat-lbl">This month</div></div>
+      <div class="stat-card"><div class="stat-num">${allPayments.length}</div><div class="stat-lbl">Payments</div></div>
+      <div class="stat-card"><div class="stat-num">${allListings.filter(l=>l.boosted).length}</div><div class="stat-lbl">Boosted</div></div>
+    </div>
+    <div class="section-head">Payment history</div>
+    ${allPayments.length===0?`<div class="empty-state"><div class="empty-icon">💰</div>No payments yet</div>`:''}
+    ${allPayments.map(p=>`
+      <div class="rev-row">
+        <div><div class="rev-label">${p.plan||'Boost'} — ${p.seller||'Seller'}</div><div class="rev-sub">${p.method||'SnapScan'}</div></div>
+        <div class="rev-amount">R${p.amount||0}</div>
+      </div>`).join('')}
+    <div class="form-wrap" style="padding-top:12px">
+      <div class="info-box green">
+        <div class="info-box-title">Revenue model</div>
+        <div class="info-box-body">Free to list · Boost fees · Verified badge subscription</div>
+      </div>
+    </div>`);
+}
+
+async function renderAdminAllListings() {
+  try { await loadListings(); } catch(e) {}
+  setView(`
+    <div class="section-head">All listings (${allListings.length})</div>
+    ${allListings.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>No listings yet</div>`:''}
+    ${allListings.map(l=>`
+      <div class="all-row">
+        <div class="all-row-left">
+          <div style="font-size:20px">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`:emojis[l.category]||'📦'}</div>
+          <div><div class="all-name">${l.name}</div><div class="all-meta">${l.phone||'—'} · R${l.price} · ${l.area}</div></div>
+        </div>
+        <div class="all-row-right">
+          <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?'Boosted':'Live'}</span>
+          <button class="action-btn red" onclick="adminRemove('${l.id}')">Remove</button>
+        </div>
+      </div>`).join('')}`);
+}
+
+async function adminRemove(id) {
+  if (!confirm('Remove this listing?')) return;
+  await db.collection('listings').doc(id).update({active:false});
+  await loadListings(); renderAdminAllListings();
+  showToast('Listing removed');
+}
+
+async function renderAdminPricing() {
+  try { pricing = await getPricing(); } catch(e) {}
+  setView(`
+    <div class="form-wrap">
+      <div class="info-box green" style="margin-bottom:16px">
+        <div class="info-box-title">Pricing settings</div>
+        <div class="info-box-body">All prices update immediately across the app</div>
+      </div>
+      <div class="pricing-field"><label>Free listings per phone number</label><input type="number" id="p-free" value="${pricing.freeListings}" min="0" inputmode="numeric"><div class="pricing-sub">Listings each phone number gets for free</div></div>
+      <div class="pricing-field"><label>Extra listing fee (R)</label><input type="number" id="p-extra" value="${pricing.extraListingFee}" min="0" inputmode="numeric"><div class="pricing-sub">Fee to post beyond the free allowance</div></div>
+      <div class="pricing-field"><label>7-day boost price (R)</label><input type="number" id="p-b7" value="${pricing.boost7Price}" min="0" inputmode="numeric"><div class="pricing-sub">7-day featured boost — paid via airtime</div></div>
+      <div class="pricing-field"><label>30-day boost price (R)</label><input type="number" id="p-b30" value="${pricing.boost30Price}" min="0" inputmode="numeric"><div class="pricing-sub">30-day featured boost — paid via SnapScan</div></div>
+      <div class="pricing-field"><label>Verified badge monthly price (R)</label><input type="number" id="p-badge" value="${pricing.badgePrice}" min="0" inputmode="numeric"><div class="pricing-sub">Monthly verified business badge</div></div>
+      <button class="btn-primary" onclick="doSavePricing()">Save pricing</button>
+    </div>`);
+}
+
+async function doSavePricing() {
+  const newP = {
+    freeListings:parseInt(document.getElementById('p-free').value)||2,
+    extraListingFee:parseInt(document.getElementById('p-extra').value)||30,
+    boost7Price:parseInt(document.getElementById('p-b7').value)||20,
+    boost30Price:parseInt(document.getElementById('p-b30').value)||50,
+    badgePrice:parseInt(document.getElementById('p-badge').value)||99
+  };
+  try { await savePricing(newP); pricing=newP; showToast('Pricing saved'); }
+  catch(e) { showToast('Could not save. Check connection.'); }
 }
 
 function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-function attachHandlers() {
-  // photo input handler re-attach after render
-  const pi = document.getElementById('photo-input');
-  if (pi) pi.onchange = handlePhotoSelect;
-}
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, user => {
-  if (user && user.email === ADMIN_EMAIL) adminLoggedIn = true;
+auth.onAuthStateChanged(user => {
+  if (user) {
+    adminLoggedIn = true;
+    loadNotifs().then(updateNotifBadge);
+    loadPayments();
+  } else {
+    adminLoggedIn = false;
+    updateNotifBadge();
+  }
 });
 
-async function init() {
-  await loadPrices();
-  await loadListings();
-  await loadNotifications();
-  await loadRevenue();
-
-  document.getElementById('loading').style.display = 'none';
-  const mainApp = document.getElementById('main-app');
-  mainApp.style.display = 'flex';
-  mainApp.style.flexDirection = 'column';
-
-  document.getElementById('tb-name').textContent = t('appName');
-  document.getElementById('tb-sub').textContent = t('appSub');
-  document.getElementById('lbl-buyer').textContent = t('buyer');
-  document.getElementById('lbl-seller').textContent = t('seller');
-  document.getElementById('lbl-admin').textContent = t('admin');
-
-  setRole('buyer');
-  document.getElementById('btn-buyer').classList.add('active');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
 init();
-
-// expose to global for onclick handlers
-window.setRole = setRole;
-window.switchTab = switchTab;
-window.onSearch = onSearch;
-window.setCat = setCat;
-window.selPay = selPay;
-window.toggleLocate = toggleLocate;
-window.updateRadius = updateRadius;
-window.setLang = setLang;
-window.handlePhotoSelect = handlePhotoSelect;
-window.removePhoto = removePhoto;
-window.submitListing = submitListing;
-window.requestBoost = requestBoost;
-window.sendPayLink = sendPayLink;
-window.dismissNotif = dismissNotif;
-window.confirmRemove = confirmRemove;
-window.adminRemoveListing = adminRemoveListing;
-window.savePricingForm = savePricingForm;
-window.adminLogout = adminLogout;
-window.waContact = waContact;
-window.shareAppLink = shareAppLink;
-window.showInfo = showInfo;
-window.clearNew = clearNew;
-window.openDetail = openDetail;
-window.closeDetail = closeDetail;
-window.doLogin = doLogin;
-window.renderPhotoPreview = renderPhotoPreview;
 </script>
 </body>
 </html>
