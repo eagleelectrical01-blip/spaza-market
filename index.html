@@ -107,6 +107,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 .status-boosted{background:var(--amber-light);color:var(--amber-text)}
 .action-btn{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;border:none;font-weight:500;background:#f5f5f5;color:#666}
 .action-btn.red{background:var(--red-light);color:var(--red)}
+.my-row-expired{opacity:0.55}
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
 .stat-card{background:#f8f8f8;border-radius:var(--radius);padding:10px;text-align:center}
 .stat-num{font-size:20px;font-weight:700;color:#111}
@@ -258,10 +259,25 @@ let adminLoggedIn = false;
 let allListings = [];
 let allNotifs = [];
 let allPayments = [];
-let pricing = {freeListings:2,extraListingFee:30,boost7Price:20,boost30Price:50,badgePrice:99};
+let pricing = {freeListings:2,extraListingFee:30,boost7Price:20,boost30Price:50,badgePrice:99,listingDays:14};
+let editingListingId = null;
+let editingExistingPhotos = [];
 let sellerPhone = localStorage.getItem('spaza_phone') || '';
 
 const ADMIN_WA = '0823474794';
+function daysRemaining(createdAt, listingDays) {
+  if (!createdAt) return listingDays || 14;
+  const created = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+  const expiry = new Date(created.getTime() + (listingDays || 14) * 86400000);
+  const diff = Math.ceil((expiry - new Date()) / 86400000);
+  return Math.max(0, diff);
+}
+function expiryBadge(listing) {
+  const days = daysRemaining(listing.createdAt, pricing.listingDays);
+  if (days <= 0) return '<span class="status-pill" style="background:#FCEBEB;color:#A32D2D">Expired</span>';
+  if (days <= 3) return `<span class="status-pill" style="background:#FAEEDA;color:#BA7517">${days}d left</span>`;
+  return `<span class="status-pill status-live">${days}d left</span>`;
+}
 const emojis = {Food:'🍖',Clothes:'👗',Services:'🔧',Electronics:'📱',Furniture:'🛋️',Other:'📦'};
 const langMeta = [
   {code:'en',name:'English',sample:'Hello, welcome to Spaza Market'},
@@ -542,17 +558,152 @@ async function renderMyListings() {
   const myList = allListings.filter(l => l.phone === sellerPhone);
   setView(`
     <div class="section-head">Your listings (${myList.length})</div>
-    ${myList.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>No listings yet</div>`:''}
-    ${myList.map(l => `
-      <div class="my-row">
-        <div class="my-icon">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}">`:emojis[l.category]||'📦'}</div>
-        <div class="my-info"><div class="my-name">${l.name}</div><div class="my-meta">R${l.price} · ${l.area}</div></div>
-        <div class="my-right">
-          <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?'Boosted':'Live'}</span>
-          <button class="action-btn red" onclick="doRemove('${l.id}')">Remove</button>
+    ${myList.length===0?`<div class="empty-state"><div class="empty-icon">📋</div><div>No listings yet</div><div style="font-size:12px;margin-top:6px;color:#aaa">Tap "+ Add listing" below to start</div></div>`:''}
+    ${myList.map(l => {
+      const days = daysRemaining(l.createdAt, pricing.listingDays);
+      const expired = days <= 0;
+      const photoHtml = (l.photos&&l.photos.length) ? `<img src="${l.photos[0]}" onerror="this.style.display='none'">` : emojis[l.category]||'📦';
+      return `<div class="my-row${expired?' my-row-expired':''}">
+        <div class="my-icon">${photoHtml}</div>
+        <div class="my-info">
+          <div class="my-name">${l.name}</div>
+          <div class="my-meta">R${l.price} · ${l.area}</div>
+          <div style="font-size:10px;color:#aaa;margin-top:2px">${l.category} · ${l.payment||'Cash'}</div>
         </div>
-      </div>`).join('')}
-    <div style="padding:12px"><button class="btn-primary" onclick="showTab(1)">+ Add listing</button></div>`);
+        <div class="my-right">
+          ${l.boosted?'<span class="status-pill status-boosted">Boosted</span>':expiryBadge(l)}
+          <div style="display:flex;gap:5px;margin-top:4px">
+            <button class="action-btn" onclick="openEdit('${l.id}')" style="background:#E6F1FB;color:#185FA5">Edit</button>
+            <button class="action-btn red" onclick="doRemove('${l.id}')">Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('')}
+    <div style="padding:12px"><button class="btn-primary" onclick="showTab(1)">+ Add listing</button></div>
+    <div style="padding:0 12px 16px;font-size:11px;color:#aaa;text-align:center">Free listings last ${pricing.listingDays} days. Boost to stay at the top longer.</div>`);
+}
+
+function openEdit(id) {
+  const listing = allListings.find(l => l.id === id);
+  if (!listing) { showToast('Listing not found'); return; }
+  editingListingId = id;
+  editingExistingPhotos = listing.photos ? [...listing.photos] : [];
+  selectedPhotos = [];
+  selectedPay = listing.payment || 'Cash';
+  const cats = ['Food','Clothes','Services','Electronics','Furniture','Other'];
+  setView(`
+    <div style="background:var(--amber-light);padding:10px 14px;border-bottom:1px solid #f0c060;font-size:12px;color:var(--amber-text);font-weight:600">
+      ✏️ Editing listing — boost status will be removed on save
+    </div>
+    <div class="form-wrap">
+      <div class="field">
+        <label>Current photos</label>
+        <div class="photo-row" id="existing-photo-row">
+          ${editingExistingPhotos.map((url,i) => `
+            <div class="photo-thumb">
+              <img src="${url}" onerror="this.src=''">
+              <button class="photo-rm" onclick="removeExistingPhoto(${i})">✕</button>
+            </div>`).join('')}
+        </div>
+        <div style="margin-top:8px">
+          <label style="font-size:11px;color:#888">Add more photos (${5-editingExistingPhotos.length} slots remaining)</label>
+          <div class="photo-upload" onclick="document.getElementById('edit-photo-input').click()" style="margin-top:6px">
+            <input type="file" id="edit-photo-input" accept="image/*" multiple onchange="handleEditPhotos(this.files)" style="display:none">
+            <div style="font-size:20px;margin-bottom:4px">📷</div>
+            <div style="font-size:12px;color:#888">Tap to add more photos</div>
+          </div>
+          <div class="photo-row" id="new-photo-row"></div>
+        </div>
+      </div>
+      <div class="field"><label>Item name *</label><input type="text" id="f-name" value="${listing.name.replace(/"/g,'&quot;')}" placeholder="e.g. Fresh vetkoek x6"></div>
+      <div class="field"><label>Category</label>
+        <select id="f-cat">${cats.map(c=>`<option${c===listing.category?' selected':''}>${c}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Price (R) *</label><input type="number" id="f-price" value="${listing.price}" inputmode="numeric"></div>
+      <div class="field"><label>Your area / street *</label><input type="text" id="f-area" value="${listing.area.replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>WhatsApp number *</label><input type="tel" id="f-phone" value="${listing.phone||sellerPhone}"></div>
+      <div class="field"><label>Description</label><textarea id="f-desc">${listing.description||''}</textarea></div>
+      <div class="field">
+        <label>Payment accepted</label>
+        <div class="pay-opts">
+          <div class="pay-opt${selectedPay==='Cash'?' sel':''}" id="po-cash" onclick="selPayOpt('Cash')">Cash</div>
+          <div class="pay-opt${selectedPay==='SnapScan'?' sel':''}" id="po-snap" onclick="selPayOpt('SnapScan')">SnapScan</div>
+          <div class="pay-opt${selectedPay==='Both'?' sel':''}" id="po-both" onclick="selPayOpt('Both')">Both</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveEdit()">Save changes</button>
+      <button class="btn-secondary" onclick="editingListingId=null;renderMyListings()">Cancel</button>
+    </div>`);
+}
+
+function removeExistingPhoto(i) {
+  editingExistingPhotos.splice(i, 1);
+  const row = document.getElementById('existing-photo-row');
+  if (row) row.innerHTML = editingExistingPhotos.map((url,idx) => `
+    <div class="photo-thumb">
+      <img src="${url}" onerror="this.src=''">
+      <button class="photo-rm" onclick="removeExistingPhoto(${idx})">✕</button>
+    </div>`).join('');
+}
+
+function handleEditPhotos(files) {
+  const remaining = 5 - editingExistingPhotos.length - selectedPhotos.length;
+  const toAdd = Array.from(files).slice(0, remaining);
+  if (files.length > remaining) showToast('Maximum 5 photos total');
+  toAdd.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => { selectedPhotos.push({file, dataUrl:e.target.result}); renderEditNewPhotos(); };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderEditNewPhotos() {
+  const row = document.getElementById('new-photo-row');
+  if (!row) return;
+  row.innerHTML = selectedPhotos.map((p,i) => `
+    <div class="photo-thumb">
+      <img src="${p.dataUrl}">
+      <button class="photo-rm" onclick="removeNewEditPhoto(${i})">✕</button>
+    </div>`).join('');
+}
+
+function removeNewEditPhoto(i) { selectedPhotos.splice(i,1); renderEditNewPhotos(); }
+
+async function saveEdit() {
+  const name = document.getElementById('f-name')?.value?.trim();
+  const price = document.getElementById('f-price')?.value;
+  const area = document.getElementById('f-area')?.value?.trim();
+  const phone = document.getElementById('f-phone')?.value?.trim();
+  const desc = document.getElementById('f-desc')?.value?.trim();
+  const cat = document.getElementById('f-cat')?.value;
+  if (!name||!price||!area||!phone) { showToast('Please fill in all required fields'); return; }
+  const btn = document.querySelector('.btn-primary');
+  if (btn) { btn.textContent='Saving...'; btn.disabled=true; }
+  try {
+    let photos = [...editingExistingPhotos];
+    if (selectedPhotos.length > 0) {
+      for (let i=0; i<selectedPhotos.length; i++) {
+        const ref = storage.ref(`listings/${editingListingId}/edit_photo_${Date.now()}_${i}`);
+        await ref.put(selectedPhotos[i].file);
+        photos.push(await ref.getDownloadURL());
+      }
+    }
+    await db.collection('listings').doc(editingListingId).update({
+      name, price:parseFloat(price), area, phone, category:cat,
+      payment:selectedPay, description:desc||'', photos,
+      boosted:false, boostExpiry:null, isNew:false,
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    editingListingId = null;
+    editingExistingPhotos = [];
+    selectedPhotos = [];
+    await loadListings();
+    showToast('Listing updated successfully');
+    renderMyListings();
+  } catch(err) {
+    showToast('Error saving: ' + err.message);
+    if (btn) { btn.textContent='Save changes'; btn.disabled=false; }
+  }
 }
 
 function phonePrompt(cb) {
@@ -914,6 +1065,7 @@ async function renderAdminPricing() {
         <div class="info-box-title">Pricing settings</div>
         <div class="info-box-body">All prices update immediately across the app</div>
       </div>
+      <div class="pricing-field"><label>Free listing duration (days)</label><input type="number" id="p-days" value="${pricing.listingDays||14}" min="1" inputmode="numeric"><div class="pricing-sub">How long a free listing stays active before expiring</div></div>
       <div class="pricing-field"><label>Free listings per phone number</label><input type="number" id="p-free" value="${pricing.freeListings}" min="0" inputmode="numeric"><div class="pricing-sub">Listings each phone number gets for free</div></div>
       <div class="pricing-field"><label>Extra listing fee (R)</label><input type="number" id="p-extra" value="${pricing.extraListingFee}" min="0" inputmode="numeric"><div class="pricing-sub">Fee to post beyond the free allowance</div></div>
       <div class="pricing-field"><label>7-day boost price (R)</label><input type="number" id="p-b7" value="${pricing.boost7Price}" min="0" inputmode="numeric"><div class="pricing-sub">7-day featured boost — paid via airtime</div></div>
@@ -925,6 +1077,7 @@ async function renderAdminPricing() {
 
 async function doSavePricing() {
   const newP = {
+    listingDays:parseInt(document.getElementById('p-days').value)||14,
     freeListings:parseInt(document.getElementById('p-free').value)||2,
     extraListingFee:parseInt(document.getElementById('p-extra').value)||30,
     boost7Price:parseInt(document.getElementById('p-b7').value)||20,
