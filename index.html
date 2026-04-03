@@ -1045,29 +1045,62 @@ async function renderAdminRevenue() {
     </div>`);
 }
 
+let adminListFilter = 'all';
+
 async function renderAdminAllListings() {
   try { await loadListings(); } catch(e) {}
+  const expired = allListings.filter(l => daysRemaining(l.createdAt, pricing.listingDays) <= 0);
+  const active = allListings.filter(l => daysRemaining(l.createdAt, pricing.listingDays) > 0);
+  const display = adminListFilter === 'expired' ? expired : allListings;
   setView(`
-    <div class="section-head">All listings (${allListings.length})</div>
-    ${allListings.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>No listings yet</div>`:''}
-    ${allListings.map(l=>`
-      <div class="all-row">
+    <div style="display:flex;gap:8px;padding:10px 12px;background:#f8f8f8;border-bottom:1px solid #eee;align-items:center;flex-wrap:wrap">
+      <button onclick="adminListFilter='all';renderAdminAllListings()" style="padding:5px 12px;border-radius:20px;border:1px solid #ddd;background:${adminListFilter==='all'?'#128C7E':'#fff'};color:${adminListFilter==='all'?'#fff':'#666'};font-size:11px;cursor:pointer;font-weight:600">All (${allListings.length})</button>
+      <button onclick="adminListFilter='expired';renderAdminAllListings()" style="padding:5px 12px;border-radius:20px;border:1px solid ${expired.length>0?'#A32D2D':'#ddd'};background:${adminListFilter==='expired'?'#A32D2D':'#fff'};color:${adminListFilter==='expired'?'#fff':expired.length>0?'#A32D2D':'#666'};font-size:11px;cursor:pointer;font-weight:600">Expired (${expired.length})</button>
+      ${expired.length>0?`<button onclick="deleteAllExpired()" style="padding:5px 12px;border-radius:20px;border:none;background:#FCEBEB;color:#A32D2D;font-size:11px;cursor:pointer;font-weight:600;margin-left:auto">🗑 Delete all expired</button>`:''}
+    </div>
+    ${display.length===0?`<div class="empty-state"><div class="empty-icon">📋</div>${adminListFilter==='expired'?'No expired listings':'No listings yet'}</div>`:''}
+    ${display.map(l => {
+      const days = daysRemaining(l.createdAt, pricing.listingDays);
+      const isExpired = days <= 0;
+      const dateStr = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('en-ZA') : 'Unknown';
+      return `<div class="all-row" style="${isExpired?'opacity:0.65;background:#fafafa':''}">
         <div class="all-row-left">
-          <div style="font-size:20px">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`:emojis[l.category]||'📦'}</div>
-          <div><div class="all-name">${l.name}</div><div class="all-meta">${l.phone||'—'} · R${l.price} · ${l.area}</div></div>
+          <div style="font-size:20px;flex-shrink:0">${(l.photos&&l.photos.length)?`<img src="${l.photos[0]}" style="width:36px;height:36px;border-radius:6px;object-fit:cover">`:emojis[l.category]||'📦'}</div>
+          <div>
+            <div class="all-name">${l.name}</div>
+            <div class="all-meta">${l.phone||'—'} · R${l.price} · ${l.area}</div>
+            <div style="font-size:10px;color:#aaa;margin-top:1px">Listed ${dateStr} · ${isExpired?'<span style="color:#A32D2D;font-weight:600">Expired</span>':`<span style="color:#128C7E">${days}d left</span>`}</div>
+          </div>
         </div>
-        <div class="all-row-right">
-          <span class="status-pill ${l.boosted?'status-boosted':'status-live'}">${l.boosted?'Boosted':'Live'}</span>
-          <button class="action-btn red" onclick="adminRemove('${l.id}')">Remove</button>
+        <div class="all-row-right" style="flex-direction:column;align-items:flex-end;gap:5px">
+          <span class="status-pill ${l.boosted?'status-boosted':isExpired?'':'status-live'}" style="${isExpired?'background:#FCEBEB;color:#A32D2D':''}">${l.boosted?'Boosted':isExpired?'Expired':'Live'}</span>
+          <button class="action-btn red" onclick="adminRemove('${l.id}')">🗑 Delete</button>
         </div>
-      </div>`).join('')}`);
+      </div>`;
+    }).join('')}`);
 }
 
 async function adminRemove(id) {
-  if (!confirm('Remove this listing?')) return;
+  if (!confirm('Delete this listing permanently?')) return;
   await db.collection('listings').doc(id).update({active:false});
-  await loadListings(); renderAdminAllListings();
-  showToast('Listing removed');
+  await loadListings();
+  renderAdminAllListings();
+  showToast('Listing deleted');
+}
+
+async function deleteAllExpired() {
+  const expired = allListings.filter(l => daysRemaining(l.createdAt, pricing.listingDays) <= 0);
+  if (expired.length === 0) { showToast('No expired listings to delete'); return; }
+  if (!confirm(`Delete all ${expired.length} expired listings?`)) return;
+  const batch = db.batch();
+  expired.forEach(l => {
+    const ref = db.collection('listings').doc(l.id);
+    batch.update(ref, {active:false});
+  });
+  await batch.commit();
+  await loadListings();
+  renderAdminAllListings();
+  showToast(`${expired.length} expired listings deleted`);
 }
 
 async function renderAdminPricing() {
