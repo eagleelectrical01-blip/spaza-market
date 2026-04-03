@@ -273,6 +273,9 @@ let pinnedAccuracy = null;
 let sellerPhone = localStorage.getItem('spaza_phone') || '';
 
 const ADMIN_WA = '0823474794';
+const SNAPSCAN_URL = 'https://pos.snapscan.io/qr/REPLACE_WITH_YOUR_SNAPSCAN_CODE';
+let boostingListingId = null;
+let boostingListingName = '';
 function daysRemaining(createdAt, listingDays) {
   if (!createdAt) return listingDays || 14;
   const created = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -612,7 +615,8 @@ async function renderMyListings() {
         </div>
         <div class="my-right">
           ${l.boosted?'<span class="status-pill status-boosted">Boosted</span>':expiryBadge(l)}
-          <div style="display:flex;gap:5px;margin-top:4px">
+          <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:wrap">
+            ${!l.boosted?`<button class="action-btn" onclick="openBoostForListing('${l.id}','${l.name.replace(/'/g,"").replace(/"/g,"")}')" style="background:#FAEEDA;color:#633806;font-weight:600">⚡ Boost</button>`:'<button class="action-btn" style="background:#E1F5EE;color:#085041;cursor:default">✓ Boosted</button>'}
             <button class="action-btn" onclick="openEdit('${l.id}')" style="background:#E6F1FB;color:#185FA5">Edit</button>
             <button class="action-btn red" onclick="doRemove('${l.id}')">Delete</button>
           </div>
@@ -975,24 +979,50 @@ async function doRemove(id) {
   showToast('Listing removed');
 }
 
+function openBoostForListing(id, name) {
+  boostingListingId = id;
+  boostingListingName = name;
+  setView('');
+  renderBoost(false);
+}
+
 function renderBoost(isPaywall) {
+  const listingBanner = boostingListingId
+    ? `<div style="background:#E1F5EE;border:1px solid #9FE1CB;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">⚡</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#085041">Boosting this listing:</div>
+          <div style="font-size:13px;color:#085041">${boostingListingName}</div>
+        </div>
+      </div>`
+    : `<div style="background:#f8f8f8;border:1px solid #eee;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px">
+        <div style="font-size:12px;color:#888">No specific listing selected. Go to <b>My Listings</b> and tap ⚡ Boost next to the listing you want to boost.</div>
+      </div>`;
+
   const boostHtml = `
     <div class="form-wrap" style="padding-top:${isPaywall?'4px':'12px'}">
+      ${listingBanner}
       <div class="info-box" style="margin-bottom:14px">
         <div class="info-box-title">How boosting works</div>
-        <div class="info-box-body">1. Tap a plan below<br>2. Admin gets notified on WhatsApp<br>3. You receive a WhatsApp payment link<br>4. Pay — listing boosts automatically</div>
+        <div class="info-box-body">
+          1. Tap a plan below<br>
+          2. Admin gets notified on WhatsApp<br>
+          3. Admin sends you a SnapScan payment link on WhatsApp<br>
+          4. You pay and send admin a screenshot of your payment<br>
+          5. Admin activates your boost — listing goes to the top
+        </div>
       </div>
-      <div class="boost-card" onclick="requestBoost('7day','${pricing.boost7Price}')">
-        <div><div class="boost-title">15-day featured boost</div><div class="boost-desc">Pay via airtime — no bank needed</div></div>
-        <div><div class="boost-price">R${pricing.boost7Price}</div><div class="boost-method">Airtime</div></div>
+      <div class="boost-card" onclick="requestBoost('15day','${pricing.boost7Price}')">
+        <div><div class="boost-title">Boost my listing — 15 days</div><div class="boost-desc">Pay via airtime or SnapScan</div></div>
+        <div><div class="boost-price">R${pricing.boost7Price}</div><div class="boost-method">15 days featured</div></div>
       </div>
       <div class="boost-card" onclick="requestBoost('30day','${pricing.boost30Price}')">
-        <div><div class="boost-title">30-day featured boost</div><div class="boost-desc">Pay via SnapScan QR code</div></div>
-        <div><div class="boost-price">R${pricing.boost30Price}</div><div class="boost-method">SnapScan</div></div>
+        <div><div class="boost-title">Boost my listing — 30 days</div><div class="boost-desc">Pay via SnapScan</div></div>
+        <div><div class="boost-price">R${pricing.boost30Price}</div><div class="boost-method">30 days featured</div></div>
       </div>
       <div class="boost-card" onclick="requestBoost('monthly','${pricing.badgePrice}')">
-        <div><div class="boost-title">Verified business badge</div><div class="boost-desc">Monthly — SnapScan or Capitec Pay</div></div>
-        <div><div class="boost-price">R${pricing.badgePrice}/mo</div><div class="boost-method">SnapScan/Capitec</div></div>
+        <div><div class="boost-title">Verified business badge</div><div class="boost-desc">Monthly subscription — all listings verified</div></div>
+        <div><div class="boost-price">R${pricing.badgePrice}/mo</div><div class="boost-method">Monthly</div></div>
       </div>
     </div>`;
   if (isPaywall) {
@@ -1004,18 +1034,27 @@ function renderBoost(isPaywall) {
 
 async function requestBoost(plan, price) {
   if (!sellerPhone) { showToast('Enter your WhatsApp number in My Listings first'); return; }
-  const planNames = {'7day':'15-day boost','30day':'30-day boost',monthly:'Verified badge'};
-  const methods = {'7day':'airtime','30day':'SnapScan',monthly:'SnapScan/Capitec'};
+  if (!boostingListingId) { showToast('Please go to My Listings and tap ⚡ Boost on a specific listing'); return; }
+  const planNames = {'15day':'15-day boost','30day':'30-day boost',monthly:'Verified badge'};
+  const planDays = {'15day':15,'30day':30,monthly:30};
   try {
     await db.collection('boostRequests').add({
-      type:'boost', seller:sellerPhone, plan:planNames[plan],
-      price:`R${price}`, method:methods[plan], status:'pending',
+      type:'boost',
+      seller:sellerPhone,
+      listingId:boostingListingId,
+      listingName:boostingListingName,
+      plan:planNames[plan],
+      days:planDays[plan],
+      price:`R${price}`,
+      status:'pending',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     await loadNotifs();
     updateNotifBadge();
-    const msg = encodeURIComponent(`New boost request from ${sellerPhone}: ${planNames[plan]} — R${price} via ${methods[plan]}`);
-    showToast('Boost requested — admin notified on WhatsApp');
+    showToast('Boost requested! Admin will WhatsApp you a payment link.');
+    boostingListingId = null;
+    boostingListingName = '';
+    setTimeout(() => { setRole('seller'); showTab(0); }, 2000);
   } catch(e) {
     showToast('Could not send request. Please try again.');
   }
@@ -1111,9 +1150,9 @@ async function renderAdminNotifs() {
             <button onclick="deleteNotif('${n.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#ccc;padding:0;line-height:1" title="Delete">🗑</button>
           </div>
         </div>
-        <div class="notif-body">${n.body||`${n.seller||''} — ${n.plan||''} ${n.price||''}`}</div>
+        <div class="notif-body">${n.body||`${n.seller||''} — ${n.plan||''} ${n.price||''}`}${n.listingName?`<div style="font-size:11px;color:#128C7E;margin-top:3px;font-weight:600">Listing: ${n.listingName}</div>`:''}</div>
         ${isPend&&isBoost?`<div class="notif-actions">
-          <button class="notif-btn amber" onclick="sendPayLink('${n.id}','${n.seller||''}','${n.price||''}')">Send payment link</button>
+          <button class="notif-btn amber" onclick="sendPayLink('${n.id}','${n.seller||''}','${n.price||''}','${(n.listingName||'').replace(/'/g,'')}','${n.listingId||''}')">Send payment link</button>
           <button class="notif-btn gray" onclick="dismissNotif('${n.id}')">Dismiss</button>
         </div>`:''}
         ${!isPend?`<div class="notif-done">✓ Done</div>`:''}
@@ -1122,18 +1161,25 @@ async function renderAdminNotifs() {
   updateNotifBadge();
 }
 
-async function sendPayLink(id, phone, price) {
-  const msg = encodeURIComponent(`Hi! Your Spaza Market boost has been received.\n\nAmount: ${price}\n\nPlease pay via SnapScan:\nhttps://pos.snapscan.io/qr/spazamarket\n\nOnce paid your listing will be boosted. — Spaza Market`);
+async function sendPayLink(id, phone, price, listingName, listingId) {
+  const listing = listingName ? `"${listingName}"` : 'your listing';
+  const msg = encodeURIComponent(
+    `Hi! Your Spaza Market boost request for ${listing} has been received.\n\n` +
+    `Amount to pay: *${price}*\n\n` +
+    `Please pay via SnapScan:\n${window.SNAPSCAN_URL_LIVE || SNAPSCAN_URL}\n\n` +
+    `*Important:* After paying, please send me a screenshot of your SnapScan payment confirmation so I can activate your boost.\n\n` +
+    `— Spaza Market Admin`
+  );
   window.open(`https://wa.me/27${(phone||ADMIN_WA).replace(/^0/,'')}?text=${msg}`, '_blank');
-  await db.collection('boostRequests').doc(id).update({status:'sent'});
+  await db.collection('boostRequests').doc(id).update({status:'sent', listingId: listingId||''});
   await db.collection('payments').add({
     seller:phone, amount:parseInt((price||'0').replace('R','')),
-    plan:'Boost', method:'SnapScan',
+    plan:'Boost', method:'SnapScan', listingId: listingId||'', listingName: listingName||'',
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   });
   await loadNotifs(); await loadPayments();
   renderAdminNotifs();
-  showToast('WhatsApp payment link sent');
+  showToast('WhatsApp payment link sent — wait for seller screenshot');
 }
 
 async function dismissNotif(id) {
@@ -1213,7 +1259,10 @@ async function renderAdminAllListings() {
         </div>
         <div class="all-row-right" style="flex-direction:column;align-items:flex-end;gap:5px">
           <span class="status-pill ${l.boosted?'status-boosted':isExpired?'':'status-live'}" style="${isExpired?'background:#FCEBEB;color:#A32D2D':''}">${l.boosted?'Boosted':isExpired?'Expired':'Live'}</span>
-          <button class="action-btn red" onclick="adminRemove('${l.id}')">🗑 Delete</button>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
+            ${!l.boosted?`<button class="action-btn" onclick="adminActivateBoost('${l.id}')" style="background:#FAEEDA;color:#633806;font-weight:600">⚡ Boost</button>`:`<button class="action-btn" onclick="adminDeactivateBoost('${l.id}')" style="background:#E1F5EE;color:#085041">✓ Deactivate</button>`}
+            <button class="action-btn red" onclick="adminRemove('${l.id}')">🗑 Delete</button>
+          </div>
         </div>
       </div>`;
     }).join('')}`);
@@ -1225,6 +1274,30 @@ async function adminRemove(id) {
   await loadListings();
   renderAdminAllListings();
   showToast('Listing deleted');
+}
+
+async function adminActivateBoost(id) {
+  const days = 30;
+  const expiry = new Date();
+  expiry.setDate(expiry.getDate() + days);
+  await db.collection('listings').doc(id).update({
+    boosted: true,
+    boostExpiry: firebase.firestore.Timestamp.fromDate(expiry)
+  });
+  await loadListings();
+  renderAdminAllListings();
+  showToast('Boost activated — listing now at the top');
+}
+
+async function adminDeactivateBoost(id) {
+  if (!confirm('Deactivate boost for this listing?')) return;
+  await db.collection('listings').doc(id).update({
+    boosted: false,
+    boostExpiry: null
+  });
+  await loadListings();
+  renderAdminAllListings();
+  showToast('Boost deactivated');
 }
 
 async function deleteAllExpired() {
@@ -1250,6 +1323,11 @@ async function renderAdminPricing() {
         <div class="info-box-title">Pricing settings</div>
         <div class="info-box-body">All prices update immediately across the app</div>
       </div>
+      <div class="pricing-field">
+        <label>Your SnapScan payment link</label>
+        <input type="text" id="p-snapscan" value="${pricing.snapscanUrl||''}" placeholder="https://pos.snapscan.io/qr/YourCode">
+        <div class="pricing-sub">Paste your SnapScan merchant QR link here. Register free at snapscan.io</div>
+      </div>
       <div class="pricing-field"><label>Free listing duration (days)</label><input type="number" id="p-days" value="${pricing.listingDays||14}" min="1" inputmode="numeric"><div class="pricing-sub">How long a free listing stays active before expiring</div></div>
       <div class="pricing-field"><label>Free listings per phone number</label><input type="number" id="p-free" value="${pricing.freeListings}" min="0" inputmode="numeric"><div class="pricing-sub">Listings each phone number gets for free</div></div>
       <div class="pricing-field"><label>Extra listing fee (R)</label><input type="number" id="p-extra" value="${pricing.extraListingFee}" min="0" inputmode="numeric"><div class="pricing-sub">Fee to post beyond the free allowance</div></div>
@@ -1261,15 +1339,22 @@ async function renderAdminPricing() {
 }
 
 async function doSavePricing() {
+  const snapscanUrl = document.getElementById('p-snapscan')?.value?.trim() || '';
   const newP = {
     listingDays:parseInt(document.getElementById('p-days').value)||14,
     freeListings:parseInt(document.getElementById('p-free').value)||2,
     extraListingFee:parseInt(document.getElementById('p-extra').value)||30,
     boost7Price:parseInt(document.getElementById('p-b7').value)||20,
     boost30Price:parseInt(document.getElementById('p-b30').value)||50,
-    badgePrice:parseInt(document.getElementById('p-badge').value)||99
+    badgePrice:parseInt(document.getElementById('p-badge').value)||99,
+    snapscanUrl
   };
-  try { await savePricing(newP); pricing=newP; showToast('Pricing saved'); }
+  try {
+    await savePricing(newP);
+    pricing=newP;
+    if (snapscanUrl) window.SNAPSCAN_URL_LIVE = snapscanUrl;
+    showToast('Pricing saved');
+  }
   catch(e) { showToast('Could not save. Check connection.'); }
 }
 
