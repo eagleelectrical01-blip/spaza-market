@@ -241,6 +241,13 @@ const storage = firebase.storage();
 </script>
 <script>
 window.currentLang = localStorage.getItem('spaza_lang') || 'en';
+function t(key) {
+  const lang = window.currentLang || 'en';
+  const langData = (typeof TRANSLATIONS !== 'undefined' && TRANSLATIONS[lang]) ? TRANSLATIONS[lang] : (typeof TRANSLATIONS !== 'undefined' ? TRANSLATIONS['en'] : {});
+  if (langData[key] !== undefined) return langData[key];
+  if (typeof TRANSLATIONS !== 'undefined' && TRANSLATIONS['en'] && TRANSLATIONS['en'][key] !== undefined) return TRANSLATIONS['en'][key];
+  return key;
+}
 let role = 'buyer';
 let currentCat = 'All';
 let located = false;
@@ -319,8 +326,8 @@ function updateNotifBadge() {
 }
 
 function applyLang() {
-  document.getElementById('tb-name').textContent = t('appName');
-  document.getElementById('tb-sub').textContent = t('appSub');
+  try { document.getElementById('tb-name').textContent = t('appName') || 'Spaza Market'; } catch(e) {}
+  try { document.getElementById('tb-sub').textContent = t('appSub') || 'Buy &amp; sell near you'; } catch(e) {}
 }
 
 function setRole(r) {
@@ -499,30 +506,31 @@ function setLang(code) {
   showToast(langMeta.find(l=>l.code===code).name + ' selected');
 }
 
-function renderHowTo() {
-  const steps = [
-    [t('howToStep1Title'),t('howToStep1')],
-    [t('howToStep2Title'),t('howToStep2')],
-    [t('howToStep3Title'),t('howToStep3')],
-    [t('howToStep4Title'),t('howToStep4')],
-    [t('howToStep5Title'),t('howToStep5')],
-    [t('howToStep6Title'),t('howToStep6')]
+function getHowToSteps() {
+  const raw = t('howToSteps');
+  if (Array.isArray(raw)) return raw.map(s => [s.title, s.body]);
+  return [
+    ['Browse listings','Scroll through listings near you. Use the search bar to find something specific.'],
+    ['Find listings near you','Tap Near Me. Allow location access. Listings sort from closest to furthest.'],
+    ['Contact a seller','Tap the WhatsApp button on any listing to chat directly with the seller.'],
+    ['Sell your items','Switch to Seller view. Tap Add Listing. Fill in your details. First listings are FREE.'],
+    ['Boost your listing','Tap Boost. Choose a plan. Admin sends a WhatsApp payment link. Pay and listing goes to top.'],
+    ['Change language','Tap the Language tab. Choose your language. The whole app switches instantly.']
   ];
+}
+
+function renderHowTo() {
+  const steps = getHowToSteps();
+  const title = t('howToTitle') || 'How to use Spaza Market';
   setView(`
-    <div style="padding:10px 0 4px 14px;font-size:14px;font-weight:700;color:#111">${t('howToTitle')}</div>
+    <div style="padding:10px 0 4px 14px;font-size:14px;font-weight:700;color:#111">${title}</div>
     ${steps.map((s,i) => `<div class="how-step"><div class="how-num">${i+1}</div><div class="how-title">${s[0]}</div><div class="how-text">${s[1]}</div></div>`).join('')}`);
 }
 
 function openHowTo() {
-  const steps = [
-    [t('howToStep1Title'),t('howToStep1')],
-    [t('howToStep2Title'),t('howToStep2')],
-    [t('howToStep3Title'),t('howToStep3')],
-    [t('howToStep4Title'),t('howToStep4')],
-    [t('howToStep5Title'),t('howToStep5')],
-    [t('howToStep6Title'),t('howToStep6')]
-  ];
-  document.getElementById('howto-modal-title').textContent = t('howToTitle');
+  const steps = getHowToSteps();
+  const title = t('howToTitle') || 'How to use Spaza Market';
+  document.getElementById('howto-modal-title').textContent = title;
   document.getElementById('howto-modal-content').innerHTML = steps.map((s,i) =>
     `<div class="how-step"><div class="how-num">${i+1}</div><div class="how-title">${s[0]}</div><div class="how-text">${s[1]}</div></div>`
   ).join('');
