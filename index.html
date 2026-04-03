@@ -979,7 +979,10 @@ async function renderAdminNotifs() {
       <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${pending.length}</div><div class="stat-lbl">Pending</div></div>
       <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0)}</div><div class="stat-lbl">Revenue</div></div>
     </div>
-    <div class="section-head">Notifications (${pending.length} pending)</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px 4px">
+      <div class="section-head" style="padding:0">Notifications (${pending.length} pending)</div>
+      ${allNotifs.length>0?`<button onclick="deleteAllNotifs()" style="font-size:11px;padding:4px 10px;border-radius:20px;border:none;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-weight:600">🗑 Clear all</button>`:''}
+    </div>
     ${allNotifs.length===0?`<div class="empty-state"><div class="empty-icon">🔔</div>No notifications yet</div>`:''}
     ${allNotifs.map(n => {
       const isBoost = n.type==='boost';
@@ -989,7 +992,10 @@ async function renderAdminNotifs() {
       return `<div class="notif-card ${cls}">
         <div class="notif-top">
           <div class="notif-title">${isBoost?'⚡':'🆕'} ${n.title||(isBoost?'Boost request':'New listing')}</div>
-          <div class="notif-time">${timeStr}</div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <div class="notif-time">${timeStr}</div>
+            <button onclick="deleteNotif('${n.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#ccc;padding:0;line-height:1" title="Delete">🗑</button>
+          </div>
         </div>
         <div class="notif-body">${n.body||`${n.seller||''} — ${n.plan||''} ${n.price||''}`}</div>
         ${isPend&&isBoost?`<div class="notif-actions">
@@ -1019,6 +1025,25 @@ async function sendPayLink(id, phone, price) {
 async function dismissNotif(id) {
   await db.collection('boostRequests').doc(id).update({status:'dismissed'});
   await loadNotifs(); renderAdminNotifs();
+}
+
+async function deleteNotif(id) {
+  await db.collection('boostRequests').doc(id).delete();
+  allNotifs = allNotifs.filter(n => n.id !== id);
+  renderAdminNotifs();
+  showToast('Notification deleted');
+}
+
+async function deleteAllNotifs() {
+  if (!confirm('Delete all notifications?')) return;
+  const batch = db.batch();
+  allNotifs.forEach(n => {
+    batch.delete(db.collection('boostRequests').doc(n.id));
+  });
+  await batch.commit();
+  allNotifs = [];
+  renderAdminNotifs();
+  showToast('All notifications deleted');
 }
 
 async function renderAdminRevenue() {
