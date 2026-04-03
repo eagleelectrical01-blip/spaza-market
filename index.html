@@ -62,6 +62,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 .pay-snap{background:var(--blue-light);color:var(--blue-text)}
 .pay-both{background:var(--purple-light);color:var(--purple-text)}
 .wa-btn{background:#25D366;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:6px;cursor:pointer;font-weight:600}
+.map-btn{background:#1A73E8;color:#fff;border:none;font-size:10px;padding:4px 8px;border-radius:6px;cursor:pointer;font-weight:600}
 .empty-state{text-align:center;padding:40px 20px;color:#888;font-size:14px;grid-column:span 2}
 .empty-icon{font-size:40px;margin-bottom:12px}
 .section-head{padding:12px 14px 6px;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px}
@@ -461,10 +462,19 @@ function buildCards(list) {
       </div>
       <div class="card-foot">
         <span class="pay-pill ${pc}">${pl}</span>
-        <button class="wa-btn" onclick="waContact('${l.phone||''}','${l.name.replace(/'/g,'')}')">${t('whatsapp')}</button>
+        <div style="display:flex;gap:4px">
+          ${hasPinnedGPS?`<button class="map-btn" onclick="openMap(${l.lat},${l.lng},'${l.name.replace(/'/g,'').replace(/"/g,'')}')">🗺 Map</button>`:''}
+          <button class="wa-btn" onclick="waContact('${l.phone||''}','${l.name.replace(/'/g,'')}')">${t('whatsapp')}</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function openMap(lat, lng, name) {
+  if (!lat || !lng) { showToast('No location pinned for this listing'); return; }
+  const url = `https://www.google.com/maps?q=${lat},${lng}&query_place_id=&label=${encodeURIComponent(name)}`;
+  window.open(url, '_blank');
 }
 
 function renderBrowse() {
@@ -831,24 +841,49 @@ function pinMyLocation() {
   const note = document.getElementById('pin-note');
   if (!btn) return;
   btn.className = 'pin-btn locating';
-  if (txt) txt.textContent = 'Getting your location...';
+  if (txt) txt.textContent = 'Getting GPS — keep still...';
   if (ico) ico.textContent = '⏳';
-  navigator.geolocation.getCurrentPosition(pos => {
-    pinnedLat = pos.coords.latitude;
-    pinnedLng = pos.coords.longitude;
-    pinnedAccuracy = Math.round(pos.coords.accuracy);
-    btn.className = 'pin-btn pinned';
-    if (ico) ico.textContent = '✅';
-    if (txt) txt.textContent = `Location pinned — ${pinnedAccuracy}m accuracy`;
-    if (note) note.textContent = 'Your exact spot is saved with this listing. Re-pin tomorrow if you move.';
-    if (note) note.style.color = '#128C7E';
-  }, (err) => {
-    btn.className = 'pin-btn';
-    if (ico) ico.textContent = '📍';
-    if (txt) txt.textContent = 'Could not get location — tap to try again';
-    if (note) note.textContent = 'Make sure location is enabled on your phone.';
-    if (note) note.style.color = '#A32D2D';
-  }, {enableHighAccuracy:true, timeout:10000});
+  if (note) { note.textContent = 'For best accuracy use your phone outdoors.'; note.style.color = '#888'; }
+
+  let bestPos = null;
+  let attempts = 0;
+  const maxAttempts = 3;
+
+  function tryPin() {
+    navigator.geolocation.getCurrentPosition(pos => {
+      attempts++;
+      if (!bestPos || pos.coords.accuracy < bestPos.coords.accuracy) {
+        bestPos = pos;
+      }
+      if (attempts < maxAttempts && pos.coords.accuracy > 30) {
+        if (txt) txt.textContent = `Improving accuracy (${Math.round(pos.coords.accuracy)}m)...`;
+        setTimeout(tryPin, 1500);
+      } else {
+        pinnedLat = bestPos.coords.latitude;
+        pinnedLng = bestPos.coords.longitude;
+        pinnedAccuracy = Math.round(bestPos.coords.accuracy);
+        btn.className = 'pin-btn pinned';
+        if (ico) ico.textContent = '✅';
+        const quality = pinnedAccuracy < 20 ? 'Excellent' : pinnedAccuracy < 50 ? 'Good' : pinnedAccuracy < 150 ? 'OK' : 'Poor';
+        if (txt) txt.textContent = `📍 Pinned — ${pinnedAccuracy}m accuracy (${quality})`;
+        if (note) {
+          if (pinnedAccuracy > 150) {
+            note.textContent = 'Accuracy is low. You are likely on a desktop or WiFi only. On your phone outdoors you will get much better accuracy.';
+            note.style.color = '#BA7517';
+          } else {
+            note.textContent = 'Location saved. Re-pin tomorrow if you move to a new spot.';
+            note.style.color = '#128C7E';
+          }
+        }
+      }
+    }, (err) => {
+      btn.className = 'pin-btn';
+      if (ico) ico.textContent = '📍';
+      if (txt) txt.textContent = 'Could not get location — tap to try again';
+      if (note) { note.textContent = 'Make sure location is turned ON in your phone settings.'; note.style.color = '#A32D2D'; }
+    }, {enableHighAccuracy: true, timeout: 15000, maximumAge: 0});
+  }
+  tryPin();
 }
 
 function handlePhotos(files) {
