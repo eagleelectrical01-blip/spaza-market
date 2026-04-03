@@ -314,10 +314,10 @@ async function savePricing(p) {
 async function loadListings() {
   const snap = await db.collection('listings')
     .where('active','==',true)
-    .orderBy('boosted','desc')
     .orderBy('createdAt','desc')
     .get();
-  allListings = snap.docs.map(d => ({id:d.id,...d.data()}));
+  const docs = snap.docs.map(d => ({id:d.id,...d.data()}));
+  allListings = [...docs.filter(l=>l.boosted), ...docs.filter(l=>!l.boosted)];
 }
 
 async function loadNotifs() {
