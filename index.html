@@ -869,7 +869,7 @@ function renderBoost(isPaywall) {
         <div class="info-box-body">1. Tap a plan below<br>2. Admin gets notified on WhatsApp<br>3. You receive a WhatsApp payment link<br>4. Pay — listing boosts automatically</div>
       </div>
       <div class="boost-card" onclick="requestBoost('7day','${pricing.boost7Price}')">
-        <div><div class="boost-title">7-day featured boost</div><div class="boost-desc">Pay via airtime — no bank needed</div></div>
+        <div><div class="boost-title">15-day featured boost</div><div class="boost-desc">Pay via airtime — no bank needed</div></div>
         <div><div class="boost-price">R${pricing.boost7Price}</div><div class="boost-method">Airtime</div></div>
       </div>
       <div class="boost-card" onclick="requestBoost('30day','${pricing.boost30Price}')">
@@ -890,7 +890,7 @@ function renderBoost(isPaywall) {
 
 async function requestBoost(plan, price) {
   if (!sellerPhone) { showToast('Enter your WhatsApp number in My Listings first'); return; }
-  const planNames = {'7day':'7-day boost','30day':'30-day boost',monthly:'Verified badge'};
+  const planNames = {'7day':'15-day boost','30day':'30-day boost',monthly:'Verified badge'};
   const methods = {'7day':'airtime','30day':'SnapScan',monthly:'SnapScan/Capitec'};
   try {
     await db.collection('boostRequests').add({
@@ -1139,7 +1139,7 @@ async function renderAdminPricing() {
       <div class="pricing-field"><label>Free listing duration (days)</label><input type="number" id="p-days" value="${pricing.listingDays||14}" min="1" inputmode="numeric"><div class="pricing-sub">How long a free listing stays active before expiring</div></div>
       <div class="pricing-field"><label>Free listings per phone number</label><input type="number" id="p-free" value="${pricing.freeListings}" min="0" inputmode="numeric"><div class="pricing-sub">Listings each phone number gets for free</div></div>
       <div class="pricing-field"><label>Extra listing fee (R)</label><input type="number" id="p-extra" value="${pricing.extraListingFee}" min="0" inputmode="numeric"><div class="pricing-sub">Fee to post beyond the free allowance</div></div>
-      <div class="pricing-field"><label>7-day boost price (R)</label><input type="number" id="p-b7" value="${pricing.boost7Price}" min="0" inputmode="numeric"><div class="pricing-sub">7-day featured boost — paid via airtime</div></div>
+      <div class="pricing-field"><label>15-day boost price (R)</label><input type="number" id="p-b7" value="${pricing.boost7Price}" min="0" inputmode="numeric"><div class="pricing-sub">15-day featured boost — paid via airtime</div></div>
       <div class="pricing-field"><label>30-day boost price (R)</label><input type="number" id="p-b30" value="${pricing.boost30Price}" min="0" inputmode="numeric"><div class="pricing-sub">30-day featured boost — paid via SnapScan</div></div>
       <div class="pricing-field"><label>Verified badge monthly price (R)</label><input type="number" id="p-badge" value="${pricing.badgePrice}" min="0" inputmode="numeric"><div class="pricing-sub">Monthly verified business badge</div></div>
       <button class="btn-primary" onclick="doSavePricing()">Save pricing</button>
