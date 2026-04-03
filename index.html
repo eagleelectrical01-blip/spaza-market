@@ -108,6 +108,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 .action-btn{font-size:11px;padding:3px 9px;border-radius:5px;cursor:pointer;border:none;font-weight:500;background:#f5f5f5;color:#666}
 .action-btn.red{background:var(--red-light);color:var(--red)}
 .my-row-expired{opacity:0.55}
+.pin-btn{width:100%;padding:11px;border:2px dashed #128C7E;border-radius:var(--radius);background:#f8fffd;color:#128C7E;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s}
+.pin-btn.pinned{background:#E1F5EE;border-style:solid;color:#085041}
+.pin-btn.locating{background:#f8f8f8;border-color:#ccc;color:#888;cursor:wait}
+.shop-name-note{font-size:11px;color:#aaa;margin-top:3px}
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 12px}
 .stat-card{background:#f8f8f8;border-radius:var(--radius);padding:10px;text-align:center}
 .stat-num{font-size:20px;font-weight:700;color:#111}
@@ -262,6 +266,9 @@ let allPayments = [];
 let pricing = {freeListings:2,extraListingFee:30,boost7Price:20,boost30Price:50,badgePrice:99,listingDays:14};
 let editingListingId = null;
 let editingExistingPhotos = [];
+let pinnedLat = null;
+let pinnedLng = null;
+let pinnedAccuracy = null;
 let sellerPhone = localStorage.getItem('spaza_phone') || '';
 
 const ADMIN_WA = '0823474794';
@@ -408,9 +415,17 @@ function getSortedListings(q, cat) {
     return true;
   });
   if (located && userLat) {
-    list = list.map(l => ({...l, km: calcDist(userLat,userLng,l.lat||-26.2,l.lng||28.0)}))
-      .filter(l => l.km <= radiusKm)
-      .sort((a,b) => a.km - b.km);
+    list = list.map(l => {
+      const hasGPS = l.hasPinnedGPS && l.lat && l.lng;
+      const km = hasGPS ? calcDist(userLat,userLng,l.lat,l.lng) : null;
+      return {...l, km};
+    }).filter(l => l.km === null || l.km <= radiusKm)
+      .sort((a,b) => {
+        if (a.km !== null && b.km !== null) return a.km - b.km;
+        if (a.km !== null) return -1;
+        if (b.km !== null) return 1;
+        return 0;
+      });
   }
   return [...list.filter(l=>l.boosted), ...list.filter(l=>!l.boosted)];
 }
@@ -428,7 +443,10 @@ function buildCards(list) {
     const pl = l.payment==='SnapScan'?'SnapScan':l.payment==='Both'?'COD+Snap':'COD';
     const hasPhoto = l.photos && l.photos.length > 0;
     const imgHtml = hasPhoto ? `<img src="${l.photos[0]}" onerror="this.style.display='none'">` : `<span class="card-emoji">${emojis[l.category]||'📦'}</span>`;
-    const kmHtml = (located && l.km!=null) ? ` <span class="card-km">${l.km.toFixed(1)}km</span>` : '';
+    const hasPinnedGPS = l.lat && l.lng && l.lat !== -26.2;
+    const kmHtml = (located && l.km!=null && hasPinnedGPS) ? ` <span class="card-km">${l.km.toFixed(1)}km</span>` : '';
+    const shopHtml = l.shopName ? `<div style="font-size:10px;color:#128C7E;font-weight:600;margin-bottom:2px">🏪 ${l.shopName}</div>` : '';
+    const noPinNote = (!hasPinnedGPS && located) ? '' : '';
     return `<div class="card${l.boosted?' boosted':''}">
       <div class="card-img-wrap">${imgHtml}
         ${l.boosted?`<div class="card-tag tag-boost">${t('featured')}</div>`:''}
@@ -436,6 +454,7 @@ function buildCards(list) {
         ${l.isNew&&!l.boosted?`<div class="card-tag tag-new">${t('newTag')}</div>`:''}
       </div>
       <div class="card-body">
+        ${shopHtml}
         <div class="card-name">${l.name}</div>
         <div class="card-loc">📍 ${l.area}${kmHtml}</div>
         <div class="card-price">R${l.price}</div>
@@ -579,7 +598,7 @@ async function renderMyListings() {
         <div class="my-info">
           <div class="my-name">${l.name}</div>
           <div class="my-meta">R${l.price} · ${l.area}</div>
-          <div style="font-size:10px;color:#aaa;margin-top:2px">${l.category} · ${l.payment||'Cash'}</div>
+          <div style="font-size:10px;color:#aaa;margin-top:2px">${l.shopName?`<span style="color:#128C7E">🏪 ${l.shopName}</span> · `:''}${l.category}${l.hasPinnedGPS?' · <span style="color:#128C7E">📍 Pinned</span>':' · <span style="color:#ccc">No GPS pin</span>'}</div>
         </div>
         <div class="my-right">
           ${l.boosted?'<span class="status-pill status-boosted">Boosted</span>':expiryBadge(l)}
@@ -626,7 +645,16 @@ function openEdit(id) {
           <div class="photo-row" id="new-photo-row"></div>
         </div>
       </div>
+      <div class="field">
+        <label>📍 Update your location (optional)</label>
+        <button class="pin-btn${listing.hasPinnedGPS?' pinned':''}" id="pin-btn" onclick="pinMyLocation()">
+          <span id="pin-icon">${listing.hasPinnedGPS?'✅':'📍'}</span>
+          <span id="pin-text">${listing.hasPinnedGPS?'Location already pinned — tap to re-pin':'Tap to pin your current location'}</span>
+        </button>
+        <div class="shop-name-note">Re-pin if you have moved to a new spot today</div>
+      </div>
       <div class="field"><label>Item name *</label><input type="text" id="f-name" value="${listing.name.replace(/"/g,'&quot;')}" placeholder="e.g. Fresh vetkoek x6"></div>
+      <div class="field"><label>Shop name (optional)</label><input type="text" id="f-shop" value="${listing.shopName||''}" placeholder="e.g. Mama Thandi's Kitchen"><div class="shop-name-note">Leave blank if you don't have a shop name</div></div>
       <div class="field"><label>Category</label>
         <select id="f-cat">${cats.map(c=>`<option${c===listing.category?' selected':''}>${c}</option>`).join('')}</select>
       </div>
@@ -699,15 +727,24 @@ async function saveEdit() {
         photos.push(await ref.getDownloadURL());
       }
     }
-    await db.collection('listings').doc(editingListingId).update({
+    const shopName = document.getElementById('f-shop')?.value?.trim() || '';
+    const updateData = {
       name, price:parseFloat(price), area, phone, category:cat,
+      shopName: shopName || '',
       payment:selectedPay, description:desc||'', photos,
       boosted:false, boostExpiry:null, isNew:false,
       updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
+    };
+    if (pinnedLat && pinnedLng) {
+      updateData.lat = pinnedLat;
+      updateData.lng = pinnedLng;
+      updateData.hasPinnedGPS = true;
+    }
+    await db.collection('listings').doc(editingListingId).update(updateData);
     editingListingId = null;
     editingExistingPhotos = [];
     selectedPhotos = [];
+    pinnedLat = null; pinnedLng = null; pinnedAccuracy = null;
     await loadListings();
     showToast('Listing updated successfully');
     renderMyListings();
@@ -747,6 +784,7 @@ async function renderAddListing() {
   }
   selectedPhotos = [];
   selectedPay = 'Cash';
+  pinnedLat = null; pinnedLng = null; pinnedAccuracy = null;
   setView(`
     <div class="form-wrap">
       <div class="field">
@@ -758,7 +796,16 @@ async function renderAddListing() {
         </div>
         <div class="photo-row" id="photo-row"></div>
       </div>
+      <div class="field">
+        <label>📍 Pin your exact location</label>
+        <button class="pin-btn" id="pin-btn" onclick="pinMyLocation()">
+          <span id="pin-icon">📍</span>
+          <span id="pin-text">Tap to pin where you are right now</span>
+        </button>
+        <div class="shop-name-note" id="pin-note">Buyers use this to find you by distance. Re-pin each day if you move.</div>
+      </div>
       <div class="field"><label>Item name *</label><input type="text" id="f-name" placeholder="e.g. Fresh vetkoek x6"></div>
+      <div class="field"><label>Shop name (optional)</label><input type="text" id="f-shop" placeholder="e.g. Mama Thandi's Kitchen"><div class="shop-name-note">Leave blank if you don't have a shop name</div></div>
       <div class="field"><label>Category</label><select id="f-cat">${['Food','Clothes','Services','Electronics','Furniture','Other'].map(c=>`<option>${c}</option>`).join('')}</select></div>
       <div class="field"><label>Price (R) *</label><input type="number" id="f-price" placeholder="e.g. 35" inputmode="numeric"></div>
       <div class="field"><label>Your area / street *</label><input type="text" id="f-area" placeholder="e.g. Zone 3, Soweto"></div>
@@ -775,6 +822,33 @@ async function renderAddListing() {
       <div style="font-size:12px;color:#888;margin-bottom:10px">${pricing.freeListings-count} free listing${pricing.freeListings-count!==1?'s':''} remaining</div>
       <button class="btn-primary" onclick="submitListing()">List Item — Free</button>
     </div>`);
+}
+
+function pinMyLocation() {
+  const btn = document.getElementById('pin-btn');
+  const txt = document.getElementById('pin-text');
+  const ico = document.getElementById('pin-icon');
+  const note = document.getElementById('pin-note');
+  if (!btn) return;
+  btn.className = 'pin-btn locating';
+  if (txt) txt.textContent = 'Getting your location...';
+  if (ico) ico.textContent = '⏳';
+  navigator.geolocation.getCurrentPosition(pos => {
+    pinnedLat = pos.coords.latitude;
+    pinnedLng = pos.coords.longitude;
+    pinnedAccuracy = Math.round(pos.coords.accuracy);
+    btn.className = 'pin-btn pinned';
+    if (ico) ico.textContent = '✅';
+    if (txt) txt.textContent = `Location pinned — ${pinnedAccuracy}m accuracy`;
+    if (note) note.textContent = 'Your exact spot is saved with this listing. Re-pin tomorrow if you move.';
+    if (note) note.style.color = '#128C7E';
+  }, (err) => {
+    btn.className = 'pin-btn';
+    if (ico) ico.textContent = '📍';
+    if (txt) txt.textContent = 'Could not get location — tap to try again';
+    if (note) note.textContent = 'Make sure location is enabled on your phone.';
+    if (note) note.style.color = '#A32D2D';
+  }, {enableHighAccuracy:true, timeout:10000});
 }
 
 function handlePhotos(files) {
@@ -819,11 +893,16 @@ async function submitListing() {
   const btn = document.querySelector('.btn-primary');
   if (btn) { btn.textContent='Uploading...'; btn.disabled=true; }
   try {
+    const shopName = document.getElementById('f-shop')?.value?.trim() || '';
+    const finalLat = pinnedLat || userLat || null;
+    const finalLng = pinnedLng || userLng || null;
     const docRef = await db.collection('listings').add({
       name, price:parseFloat(price), area, phone, category:cat,
+      shopName: shopName || '',
       payment:selectedPay, description:desc||'', photos:[],
       active:true, boosted:false, verified:false, isNew:true,
-      lat:userLat||-26.2, lng:userLng||28.0,
+      lat:finalLat, lng:finalLng,
+      hasPinnedGPS: !!(pinnedLat && pinnedLng),
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     if (selectedPhotos.length > 0) {
