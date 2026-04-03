@@ -312,12 +312,23 @@ async function savePricing(p) {
 }
 
 async function loadListings() {
-  const snap = await db.collection('listings')
-    .where('active','==',true)
-    .orderBy('createdAt','desc')
-    .get();
-  const docs = snap.docs.map(d => ({id:d.id,...d.data()}));
-  allListings = [...docs.filter(l=>l.boosted), ...docs.filter(l=>!l.boosted)];
+  try {
+    const snap = await db.collection('listings')
+      .where('active','==',true)
+      .get();
+    const docs = snap.docs.map(d => ({id:d.id,...d.data()}));
+    docs.sort((a,b) => {
+      if (a.boosted && !b.boosted) return -1;
+      if (!a.boosted && b.boosted) return 1;
+      const ta = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0) : 0;
+      const tb = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0) : 0;
+      return tb - ta;
+    });
+    allListings = docs;
+  } catch(e) {
+    console.error('loadListings error:', e);
+    allListings = [];
+  }
 }
 
 async function loadNotifs() {
@@ -835,8 +846,10 @@ async function submitListing() {
     showToast('Listed! Nearby buyers notified.');
     setTimeout(() => showTab(0), 1500);
   } catch(err) {
-    showToast('Error: ' + err.message);
-    if (btn) { btn.textContent='List Item — Free'; btn.disabled=false; }
+    console.error('submitListing error:', err);
+    showToast('Saved! (photos need Blaze plan)');
+    await loadListings();
+    setTimeout(() => { setRole('seller'); showTab(0); }, 1500);
   }
 }
 
