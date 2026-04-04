@@ -1220,28 +1220,78 @@ async function deleteAllNotifs() {
   showToast('All notifications deleted');
 }
 
+let revFromDate = '';
+let revToDate = '';
+
 async function renderAdminRevenue() {
   try { await loadPayments(); } catch(e) {}
-  const total = allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0);
+
+  let filtered = allPayments.filter(p => {
+    if (!revFromDate && !revToDate) return true;
+    const d = p.createdAt?.toDate ? p.createdAt.toDate() : null;
+    if (!d) return true;
+    const from = revFromDate ? new Date(revFromDate) : null;
+    const to = revToDate ? new Date(revToDate + 'T23:59:59') : null;
+    if (from && d < from) return false;
+    if (to && d > to) return false;
+    return true;
+  });
+
+  const total = filtered.reduce((s,p)=>s+parseInt(p.amount||0),0);
+  const allTotal = allPayments.reduce((s,p)=>s+parseInt(p.amount||0),0);
+
   setView(`
     <div class="stat-row">
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${total}</div><div class="stat-lbl">This month</div></div>
-      <div class="stat-card"><div class="stat-num">${allPayments.length}</div><div class="stat-lbl">Payments</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green)">R${total}</div><div class="stat-lbl">${revFromDate||revToDate?'Filtered total':'All time'}</div></div>
+      <div class="stat-card"><div class="stat-num">${filtered.length}</div><div class="stat-lbl">Payments</div></div>
       <div class="stat-card"><div class="stat-num">${allListings.filter(l=>l.boosted).length}</div><div class="stat-lbl">Boosted</div></div>
     </div>
-    <div class="section-head">Payment history</div>
-    ${allPayments.length===0?`<div class="empty-state"><div class="empty-icon">💰</div>No payments yet</div>`:''}
-    ${allPayments.map(p=>`
-      <div class="rev-row">
-        <div><div class="rev-label">${p.plan||'Boost'} — ${p.seller||'Seller'}</div><div class="rev-sub">${p.method||'SnapScan'}</div></div>
-        <div class="rev-amount">R${p.amount||0}</div>
-      </div>`).join('')}
+    <div style="padding:10px 12px;background:#f8f8f8;border-bottom:1px solid #eee">
+      <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:6px">Filter by date</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div style="flex:1;min-width:120px">
+          <div style="font-size:10px;color:#aaa;margin-bottom:3px">From</div>
+          <input type="date" id="rev-from" value="${revFromDate}" style="width:100%;padding:7px;border:1px solid #ddd;border-radius:6px;font-size:12px" onchange="revFromDate=this.value;renderAdminRevenue()">
+        </div>
+        <div style="flex:1;min-width:120px">
+          <div style="font-size:10px;color:#aaa;margin-bottom:3px">To</div>
+          <input type="date" id="rev-to" value="${revToDate}" style="width:100%;padding:7px;border:1px solid #ddd;border-radius:6px;font-size:12px" onchange="revToDate=this.value;renderAdminRevenue()">
+        </div>
+        ${revFromDate||revToDate?`<button onclick="revFromDate='';revToDate='';renderAdminRevenue()" style="padding:7px 12px;border:none;background:#FCEBEB;color:#A32D2D;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;margin-top:14px">✕ Clear</button>`:''}
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px 4px">
+      <div class="section-head" style="padding:0">Payment history (${filtered.length})</div>
+    </div>
+    ${filtered.length===0?`<div class="empty-state"><div class="empty-icon">💰</div>${revFromDate||revToDate?'No payments in this date range':'No payments yet'}</div>`:''}
+    ${filtered.map(p=>{
+      const dateStr = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleDateString('en-ZA') : '';
+      const timeStr = p.createdAt?.toDate ? p.createdAt.toDate().toLocaleTimeString('en-ZA',{hour:'2-digit',minute:'2-digit'}) : '';
+      return `<div class="rev-row">
+        <div style="flex:1">
+          <div class="rev-label">${p.plan||'Boost'} — ${p.seller||'Seller'}</div>
+          <div class="rev-sub">${p.listingName?`${p.listingName} · `:''}PayShap${dateStr?` · ${dateStr} ${timeStr}`:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="rev-amount">R${p.amount||0}</div>
+          <button onclick="deletePayment('${p.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;color:#ccc;padding:0" title="Delete">🗑</button>
+        </div>
+      </div>`;
+    }).join('')}
     <div class="form-wrap" style="padding-top:12px">
       <div class="info-box green">
         <div class="info-box-title">Revenue model</div>
         <div class="info-box-body">Free to list · Boost fees · Verified badge subscription</div>
       </div>
     </div>`);
+}
+
+async function deletePayment(id) {
+  if (!confirm('Delete this payment record?')) return;
+  await db.collection('payments').doc(id).delete();
+  allPayments = allPayments.filter(p => p.id !== id);
+  renderAdminRevenue();
+  showToast('Payment record deleted');
 }
 
 let adminListFilter = 'all';
