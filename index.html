@@ -1072,11 +1072,11 @@ async function requestBoost(plan, price) {
       status:'pending',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
-    await loadNotifs();
-    updateNotifBadge();
+    // Request saved successfully — show success regardless of what happens next
     showToast('✅ Boost request sent! Admin will WhatsApp you shortly.');
     boostingListingId = null;
     boostingListingName = '';
+    try { await loadNotifs(); updateNotifBadge(); } catch(e) {}
     setTimeout(() => { setRole('seller'); showTab(0); }, 2500);
   } catch(e) {
     console.error('requestBoost error:', e);
