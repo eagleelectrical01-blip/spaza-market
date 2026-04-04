@@ -230,6 +230,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-N2EM0Y5LSY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-N2EM0Y5LSY');
+</script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBD-t4Y9zN_0SO5S27EC_GcZFEsoXSip2s",
@@ -242,6 +251,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const analytics = firebase.analytics();
 const auth = firebase.auth();
 const storage = firebase.storage();
 </script>
@@ -315,11 +325,19 @@ const navTabs = {
   admin:['Notifications','Revenue','All Listings','Pricing']
 };
 
+function trackEvent(name, params) {
+  try {
+    gtag('event', name, params || {});
+    analytics.logEvent(name, params || {});
+  } catch(e) {}
+}
+
 async function init() {
   try { pricing = await getPricing(); } catch(e) {}
   try { await loadListings(); } catch(e) {}
   applyLang();
   setRole('buyer');
+  trackEvent('app_open', {platform: 'pwa'});
   // Auto-refresh notifications every 5 minutes when admin is logged in
   setInterval(async () => {
     if (adminLoggedIn) {
@@ -545,6 +563,7 @@ function doNearMe() {
 
 function waContact(phone, item) {
   if (!phone) { showToast('No WhatsApp number for this seller'); return; }
+  trackEvent('buyer_contact', {item: item});
   const msg = encodeURIComponent(`Hi, I saw your listing on Spaza Market: *${item}*. Is it still available?`);
   window.open(`https://wa.me/27${phone.replace(/^0/,'')}?text=${msg}`, '_blank');
 }
@@ -983,6 +1002,7 @@ async function submitListing() {
       status:'info', createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     await loadListings();
+    trackEvent('listing_created', {category: cat, area: area});
     showToast('Listed! Nearby buyers notified.');
     setTimeout(() => showTab(0), 1500);
   } catch(err) {
@@ -1073,6 +1093,7 @@ async function requestBoost(plan, price) {
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     });
     // Request saved successfully — show success regardless of what happens next
+    trackEvent('boost_requested', {plan: planNames[plan], price: price});
     showToast('✅ Boost request sent! Admin will WhatsApp you shortly.');
     boostingListingId = null;
     boostingListingName = '';
