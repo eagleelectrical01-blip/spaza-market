@@ -1173,11 +1173,16 @@ async function renderAdminNotifs() {
 async function sendPayLink(id, phone, price, listingName, listingId) {
   const listing = listingName ? `"${listingName}"` : 'your listing';
   const msg = encodeURIComponent(
-    `Hi! Your Spaza Market boost request for ${listing} has been received.\n\n` +
+    `Hi! Your Spaza Market boost request for ${listing} has been received. ✅\n\n` +
     `Amount to pay: *${price}*\n\n` +
-    `Please pay via SnapScan:\n${window.SNAPSCAN_URL_LIVE || SNAPSCAN_URL}\n\n` +
-    `*Important:* After paying, please send me a screenshot of your SnapScan payment confirmation so I can activate your boost.\n\n` +
-    `— Spaza Market Admin`
+    `Please pay via PayShap:\n` +
+    `ShapID: *0823747094@nedbank*\n` +
+    `Name: D Van Vollenstee\n\n` +
+    `How to pay:\n` +
+    `Open your banking app → Transact → PayShap → Send → type 0823747094@nedbank → enter amount → pay\n\n` +
+    `Works on Capitec, FNB, Absa, Standard Bank and Nedbank.\n\n` +
+    `Once paid send me a screenshot and I will activate your boost immediately.\n\n` +
+    `— Spaza Market`
   );
   window.open(`https://wa.me/27${(phone||ADMIN_WA).replace(/^0/,'')}?text=${msg}`, '_blank');
   await db.collection('boostRequests').doc(id).update({status:'sent', listingId: listingId||''});
