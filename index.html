@@ -1350,9 +1350,9 @@ async function renderAdminPricing() {
         <div class="info-box-body">All prices update immediately across the app</div>
       </div>
       <div class="pricing-field">
-        <label>Your SnapScan payment link</label>
-        <input type="text" id="p-snapscan" value="${pricing.snapscanUrl||''}" placeholder="https://pos.snapscan.io/qr/YourCode">
-        <div class="pricing-sub">Paste your SnapScan merchant QR link here. Register free at snapscan.io</div>
+        <label>PayShap ShapID</label>
+        <input type="text" id="p-snapscan" value="${pricing.snapscanUrl||'0823747094@nedbank'}" placeholder="e.g. 0823747094@nedbank">
+        <div class="pricing-sub">Your Nedbank PayShap ShapID — sellers pay boosts to this number</div>
       </div>
       <div class="pricing-field"><label>Free listing duration (days)</label><input type="number" id="p-days" value="${pricing.listingDays||14}" min="1" inputmode="numeric"><div class="pricing-sub">How long a free listing stays active before expiring</div></div>
       <div class="pricing-field"><label>Free listings per phone number</label><input type="number" id="p-free" value="${pricing.freeListings}" min="0" inputmode="numeric"><div class="pricing-sub">Listings each phone number gets for free</div></div>
