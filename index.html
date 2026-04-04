@@ -320,6 +320,19 @@ async function init() {
   try { await loadListings(); } catch(e) {}
   applyLang();
   setRole('buyer');
+  // Auto-refresh notifications every 5 minutes when admin is logged in
+  setInterval(async () => {
+    if (adminLoggedIn) {
+      try {
+        await loadNotifs();
+        updateNotifBadge();
+        // If currently viewing notifications tab, refresh it silently
+        if (role === 'admin' && document.querySelector('.nav-tab.active')?.textContent?.includes('Notif')) {
+          renderAdminNotifs();
+        }
+      } catch(e) {}
+    }
+  }, 5 * 60 * 1000);
 }
 
 async function getPricing() {
@@ -1005,7 +1018,7 @@ function renderBoost(isPaywall) {
         </div>
       </div>`
     : `<div style="background:#f8f8f8;border:1px solid #eee;border-radius:var(--radius);padding:10px 12px;margin-bottom:12px">
-        <div style="font-size:12px;color:#888">No specific listing selected. Go to <b>My Listings</b> and tap ⚡ Boost next to the listing you want to boost.</div>
+        <div style="font-size:12px;color:#888">💡 Tip: Go to <b>My Listings</b> and tap ⚡ Boost next to a specific listing to boost that item. Or choose a plan below to boost your account.</div>
       </div>`;
 
   const boostHtml = `
@@ -1042,16 +1055,17 @@ function renderBoost(isPaywall) {
 }
 
 async function requestBoost(plan, price) {
-  if (!sellerPhone) { showToast('Enter your WhatsApp number in My Listings first'); return; }
-  if (!boostingListingId) { showToast('Please go to My Listings and tap ⚡ Boost on a specific listing'); return; }
+  if (!sellerPhone) { showToast('Please enter your WhatsApp number in My Listings first'); return; }
   const planNames = {'15day':'15-day boost','30day':'30-day boost',monthly:'Verified badge'};
   const planDays = {'15day':15,'30day':30,monthly:30};
+  const btn = event?.target;
+  if (btn) { btn.style.opacity='0.6'; btn.style.pointerEvents='none'; }
   try {
     await db.collection('boostRequests').add({
       type:'boost',
       seller:sellerPhone,
-      listingId:boostingListingId,
-      listingName:boostingListingName,
+      listingId:boostingListingId||'',
+      listingName:boostingListingName||'',
       plan:planNames[plan],
       days:planDays[plan],
       price:`R${price}`,
@@ -1060,12 +1074,14 @@ async function requestBoost(plan, price) {
     });
     await loadNotifs();
     updateNotifBadge();
-    showToast('Boost requested! Admin will WhatsApp you a payment link.');
+    showToast('✅ Boost request sent! Admin will WhatsApp you shortly.');
     boostingListingId = null;
     boostingListingName = '';
-    setTimeout(() => { setRole('seller'); showTab(0); }, 2000);
+    setTimeout(() => { setRole('seller'); showTab(0); }, 2500);
   } catch(e) {
-    showToast('Could not send request. Please try again.');
+    console.error('requestBoost error:', e);
+    if (btn) { btn.style.opacity='1'; btn.style.pointerEvents='auto'; }
+    showToast('Request failed — please check your internet and try again.');
   }
 }
 
