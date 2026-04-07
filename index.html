@@ -347,6 +347,7 @@ async function init() {
   applyLang();
   setRole('buyer');
   trackEvent('app_open', {platform: 'pwa'});
+  startListingsListener();
   // Auto-refresh notifications every 5 minutes when admin is logged in
   setInterval(async () => {
     if (adminLoggedIn) {
@@ -388,6 +389,39 @@ async function loadListings() {
   } catch(e) {
     console.error('loadListings error:', e);
     allListings = [];
+  }
+}
+
+function startListingsListener() {
+  try {
+    db.collection('listings')
+      .where('active','==',true)
+      .onSnapshot(snap => {
+        const docs = snap.docs.map(d => ({id:d.id,...d.data()}));
+        docs.sort((a,b) => {
+          if (a.boosted && !b.boosted) return -1;
+          if (!a.boosted && b.boosted) return 1;
+          const ta = a.createdAt ? (a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0) : 0;
+          const tb = b.createdAt ? (b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0) : 0;
+          return tb - ta;
+        });
+        allListings = docs;
+        // Auto-refresh buyer browse screen when listings change
+        if (role === 'buyer') {
+          const grid = document.getElementById('listing-grid');
+          if (grid) grid.innerHTML = buildCards(getSortedListings('', currentCat));
+        }
+        // Auto-refresh seller my listings screen
+        if (role === 'seller') {
+          const myList = allListings.filter(l => l.phone === sellerPhone);
+          const myView = document.querySelector('.my-row');
+          if (myView) renderMyListings();
+        }
+      }, err => {
+        console.error('Listener error:', err);
+      });
+  } catch(e) {
+    console.error('startListingsListener error:', e);
   }
 }
 
@@ -1057,8 +1091,8 @@ async function doRemove(id) {
   if (!confirm('Remove this listing?')) return;
   await db.collection('listings').doc(id).update({active:false});
   await loadListings();
+  showToast('✅ Listing deleted');
   renderMyListings();
-  showToast('Listing removed');
 }
 
 function openBoostForListing(id, name) {
@@ -1412,9 +1446,12 @@ async function renderAdminAllListings() {
 async function adminRemove(id) {
   if (!confirm('Delete this listing permanently?')) return;
   await db.collection('listings').doc(id).update({active:false});
-  await loadListings();
+  // Remove from local array immediately so buyer screen updates instantly
+  allListings = allListings.filter(l => l.id !== id);
   renderAdminAllListings();
-  showToast('Listing deleted');
+  showToast('✅ Listing deleted');
+  // Also reload from Firestore to sync fully
+  await loadListings();
 }
 
 async function adminActivateBoost(id) {
@@ -1463,9 +1500,11 @@ async function deleteAllExpired() {
     batch.update(ref, {active:false});
   });
   await batch.commit();
-  await loadListings();
+  const expiredIds = expired.map(l => l.id);
+  allListings = allListings.filter(l => !expiredIds.includes(l.id));
   renderAdminAllListings();
-  showToast(`${expired.length} expired listings deleted`);
+  showToast(`✅ ${expired.length} expired listings deleted`);
+  await loadListings();
 }
 
 async function renderAdminPricing() {
