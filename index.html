@@ -814,9 +814,10 @@ function handleEditPhotos(files) {
   const toAdd = Array.from(files).slice(0, remaining);
   if (files.length > remaining) showToast('Maximum 5 photos total');
   toAdd.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => { selectedPhotos.push({file, dataUrl:e.target.result}); renderEditNewPhotos(); };
-    reader.readAsDataURL(file);
+    compressPhoto(file, 1200, 0.75, (compressed, dataUrl) => {
+      selectedPhotos.push({file: compressed, dataUrl});
+      renderEditNewPhotos();
+    });
   });
 }
 
@@ -847,6 +848,8 @@ async function saveEdit() {
     if (selectedPhotos.length > 0) {
       const uploadTime = Date.now();
       for (let i=0; i<selectedPhotos.length; i++) {
+        const btn2 = document.querySelector('.btn-primary');
+        if (btn2) btn2.textContent = `Uploading photo ${i+1} of ${selectedPhotos.length}...`;
         const ref = storage.ref(`listings/${editingListingId}/photo_${uploadTime}_${i}`);
         await ref.put(selectedPhotos[i].file);
         const url = await ref.getDownloadURL();
@@ -1004,15 +1007,39 @@ function pinMyLocation() {
   tryPin();
 }
 
+function compressPhoto(file, maxWidth, quality, callback) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob(blob => {
+        const compressed = new File([blob], file.name, {type:'image/jpeg'});
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        callback(compressed, dataUrl);
+      }, 'image/jpeg', quality);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function handlePhotos(files) {
   const remaining = 5 - selectedPhotos.length;
   const toAdd = Array.from(files).slice(0, remaining);
   if (files.length > remaining) showToast('Maximum 5 photos allowed');
   toAdd.forEach(file => {
     if (selectedPhotos.length >= 5) return;
-    const reader = new FileReader();
-    reader.onload = e => { selectedPhotos.push({file, dataUrl:e.target.result}); renderPhotoRow(); };
-    reader.readAsDataURL(file);
+    compressPhoto(file, 1200, 0.75, (compressed, dataUrl) => {
+      const sizeMB = (compressed.size / 1024 / 1024).toFixed(1);
+      selectedPhotos.push({file: compressed, dataUrl});
+      renderPhotoRow();
+    });
   });
 }
 
@@ -1061,6 +1088,8 @@ async function submitListing() {
     if (selectedPhotos.length > 0) {
       const urls = [];
       for (let i=0; i<selectedPhotos.length; i++) {
+        const btn2 = document.querySelector('.btn-primary');
+        if (btn2) btn2.textContent = `Uploading photo ${i+1} of ${selectedPhotos.length}...`;
         const ref = storage.ref(`listings/${docRef.id}/photo_${Date.now()}_${i}`);
         await ref.put(selectedPhotos[i].file);
         const url = await ref.getDownloadURL();
