@@ -500,6 +500,7 @@ function buildCards(list) {
       <div class="card-body">
         ${shopHtml}
         <div class="card-name">${l.name}</div>
+        ${l.description?`<div style="font-size:10px;color:#888;margin:2px 0 3px;line-height:1.3">${l.description.length>55?l.description.substring(0,55)+'...':l.description}</div>`:''}
         <div class="card-loc">📍 ${l.area}${kmHtml}</div>
         <div class="card-price">R${l.price}</div>
       </div>
@@ -776,10 +777,12 @@ async function saveEdit() {
   try {
     let photos = [...editingExistingPhotos];
     if (selectedPhotos.length > 0) {
+      const uploadTime = Date.now();
       for (let i=0; i<selectedPhotos.length; i++) {
-        const ref = storage.ref(`listings/${editingListingId}/edit_photo_${Date.now()}_${i}`);
+        const ref = storage.ref(`listings/${editingListingId}/photo_${uploadTime}_${i}`);
         await ref.put(selectedPhotos[i].file);
-        photos.push(await ref.getDownloadURL());
+        const url = await ref.getDownloadURL();
+        photos.push(url);
       }
     }
     const shopName = document.getElementById('f-shop')?.value?.trim() || '';
@@ -796,12 +799,14 @@ async function saveEdit() {
       updateData.hasPinnedGPS = true;
     }
     await db.collection('listings').doc(editingListingId).update(updateData);
+    const savedId = editingListingId;
     editingListingId = null;
     editingExistingPhotos = [];
     selectedPhotos = [];
     pinnedLat = null; pinnedLng = null; pinnedAccuracy = null;
+    if (btn) { btn.textContent='Saved!'; }
     await loadListings();
-    showToast('Listing updated successfully');
+    showToast('✅ Listing updated successfully');
     renderMyListings();
   } catch(err) {
     showToast('Error saving: ' + err.message);
@@ -870,7 +875,7 @@ async function renderAddListing() {
         <label>Payment accepted</label>
         <div class="pay-opts">
           <div class="pay-opt sel" id="po-cash" onclick="selPayOpt('Cash')">Cash</div>
-          <div class="pay-opt" id="po-snap" onclick="selPayOpt('SnapScan')">SnapScan</div>
+          <div class="pay-opt" id="po-snap" onclick="selPayOpt('PayShap')">PayShap</div>
           <div class="pay-opt" id="po-both" onclick="selPayOpt('Both')">Both</div>
         </div>
       </div>
@@ -958,7 +963,7 @@ function removePhoto(i) { selectedPhotos.splice(i,1); renderPhotoRow(); }
 function selPayOpt(val) {
   selectedPay = val;
   ['cash','snap','both'].forEach(k => document.getElementById('po-'+k)?.classList.remove('sel'));
-  const map = {Cash:'cash',SnapScan:'snap',Both:'both'};
+  const map = {Cash:'cash',PayShap:'snap',Both:'both'};
   document.getElementById('po-'+map[val])?.classList.add('sel');
 }
 
@@ -988,9 +993,10 @@ async function submitListing() {
     if (selectedPhotos.length > 0) {
       const urls = [];
       for (let i=0; i<selectedPhotos.length; i++) {
-        const ref = storage.ref(`listings/${docRef.id}/photo_${i}`);
+        const ref = storage.ref(`listings/${docRef.id}/photo_${Date.now()}_${i}`);
         await ref.put(selectedPhotos[i].file);
-        urls.push(await ref.getDownloadURL());
+        const url = await ref.getDownloadURL();
+        urls.push(url);
       }
       await db.collection('listings').doc(docRef.id).update({photos:urls});
     }
