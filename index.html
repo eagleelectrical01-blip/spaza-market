@@ -46,6 +46,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 .card.boosted{border:2px solid var(--amber)}
 .card-img-wrap{height:120px;background:#f5f5f5;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .card-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center}
+.carousel{width:100%;height:120px;position:relative;overflow:hidden}
+.carousel-track{display:flex;height:100%;transition:transform 0.3s ease;will-change:transform}
+.carousel-track img{min-width:100%;width:100%;height:120px;object-fit:cover;object-position:center;flex-shrink:0}
+.carousel-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,0.4);color:#fff;border:none;width:22px;height:22px;border-radius:50%;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5}
+.carousel-btn.prev{left:4px}
+.carousel-btn.next{right:4px}
+.carousel-dots{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);display:flex;gap:3px}
+.carousel-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.6)}
+.carousel-dot.active{background:#fff}
 .card-emoji{font-size:28px}
 .card-tag{position:absolute;font-size:9px;padding:2px 6px;border-radius:3px;font-weight:600;top:5px}
 .tag-boost{right:5px;background:var(--amber);color:#fff}
@@ -486,17 +495,30 @@ function buildCards(list) {
     const pc = l.payment==='SnapScan'?'pay-snap':l.payment==='Both'?'pay-both':'pay-cod';
     const pl = l.payment==='SnapScan'?'SnapScan':l.payment==='Both'?'COD+Snap':'COD';
     const hasPhoto = l.photos && l.photos.length > 0;
-    const imgHtml = hasPhoto ? `<img src="${l.photos[0]}" onerror="this.style.display='none'">` : `<span class="card-emoji">${emojis[l.category]||'📦'}</span>`;
     const hasPinnedGPS = l.lat && l.lng && l.lat !== -26.2;
     const kmHtml = (located && l.km!=null && hasPinnedGPS) ? ` <span class="card-km">${l.km.toFixed(1)}km</span>` : '';
     const shopHtml = l.shopName ? `<div style="font-size:10px;color:#128C7E;font-weight:600;margin-bottom:2px">🏪 ${l.shopName}</div>` : '';
-    const noPinNote = (!hasPinnedGPS && located) ? '' : '';
+    const safeId = l.id.replace(/[^a-zA-Z0-9]/g,'');
+    let imgHtml;
+    if (hasPhoto && l.photos.length > 1) {
+      const imgs = l.photos.map(url => `<img src="${url}" onerror="this.style.display='none'">`).join('');
+      const dots = l.photos.map((_,i) => `<div class="carousel-dot cd-${safeId}${i===0?' active':''}"></div>`).join('');
+      imgHtml = `<div class="carousel">
+        <div class="carousel-track" id="ct-${safeId}" data-current="0">${imgs}</div>
+        <button class="carousel-btn prev" onclick="event.stopPropagation();slideCarousel('${safeId}',-1)">‹</button>
+        <button class="carousel-btn next" onclick="event.stopPropagation();slideCarousel('${safeId}',1)">›</button>
+        <div class="carousel-dots">${dots}</div>
+      </div>`;
+    } else if (hasPhoto) {
+      imgHtml = `<div class="card-img-wrap"><img src="${l.photos[0]}" onerror="this.style.display='none'">`;
+    } else {
+      imgHtml = `<div class="card-img-wrap"><span class="card-emoji">${emojis[l.category]||'📦'}</span>`;
+    }
+    const closeImgWrap = (hasPhoto && l.photos.length > 1) ? '' : '</div>';
     return `<div class="card${l.boosted?' boosted':''}">
-      <div class="card-img-wrap">${imgHtml}
-        ${l.boosted?`<div class="card-tag tag-boost">${t('featured')}</div>`:''}
-        ${l.verified&&!l.boosted?`<div class="card-tag tag-verify">${t('verified')}</div>`:''}
-        ${l.isNew&&!l.boosted?`<div class="card-tag tag-new">${t('newTag')}</div>`:''}
-      </div>
+      ${imgHtml}${closeImgWrap}
+        ${!hasPhoto||l.photos.length<=1?`${l.boosted?`<div class="card-tag tag-boost">${t('featured')}</div>`:''}${l.verified&&!l.boosted?`<div class="card-tag tag-verify">${t('verified')}</div>`:''}${l.isNew&&!l.boosted?`<div class="card-tag tag-new">${t('newTag')}</div>`:''}`:''}
+      ${hasPhoto && l.photos.length > 1 ? '' : ''}
       <div class="card-body">
         ${shopHtml}
         <div class="card-name">${l.name}</div>
@@ -513,6 +535,18 @@ function buildCards(list) {
       </div>
     </div>`;
   }).join('');
+}
+
+function slideCarousel(id, dir) {
+  const track = document.getElementById('ct-'+id);
+  const dots = document.querySelectorAll('.cd-'+id);
+  if (!track) return;
+  const total = track.children.length;
+  let current = parseInt(track.dataset.current||'0');
+  current = (current + dir + total) % total;
+  track.dataset.current = current;
+  track.style.transform = `translateX(-${current * 100}%)`;
+  dots.forEach((d,i) => d.classList.toggle('active', i===current));
 }
 
 function openMap(lat, lng, name) {
