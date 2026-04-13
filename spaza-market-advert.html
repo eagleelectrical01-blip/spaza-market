@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spaza Market</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.stage{width:360px;height:640px;position:relative;overflow:hidden;border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,0.7);background:#000}
+.scene{position:absolute;inset:0;opacity:0;transition:opacity 0.7s ease;pointer-events:none;display:flex;flex-direction:column}
+.scene.active{opacity:1;pointer-events:all}
+.narration{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,0.93) 0%,rgba(0,0,0,0.7) 80%,transparent 100%);padding:22px 18px 34px;min-height:155px;display:flex;flex-direction:column;justify-content:flex-end}
+.narrator-label{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.narrator-dot{width:6px;height:6px;border-radius:50%;background:#128C7E;animation:dotBlink 1s ease-in-out infinite}
+@keyframes dotBlink{0%,100%{opacity:1}50%{opacity:0.15}}
+.narrator-text{font-size:15px;line-height:1.65;color:#fff;font-weight:700;min-height:75px}
+.cursor{display:inline-block;width:2px;height:17px;background:#4ECDC4;margin-left:2px;animation:cursorBlink 0.7s step-end infinite;vertical-align:middle}
+@keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+.progress-track{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.1)}
+.progress-fill{height:100%;background:#128C7E;width:0%}
+.nav-dots{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:50}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.25);transition:all 0.3s;cursor:pointer}
+.nav-dot.active{background:#fff;width:16px;border-radius:3px}
+.skip-btn{position:absolute;top:12px;right:14px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:11px;cursor:pointer;z-index:100;font-family:'Nunito',sans-serif;font-weight:700}
+/* S1 */
+.s1{background:linear-gradient(180deg,#0d0d0d 0%,#1a0800 100%)}
+.s1-art{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.rain-wrap{position:absolute;inset:0;overflow:hidden}
+.rdrop{position:absolute;width:1.5px;background:linear-gradient(180deg,transparent,rgba(120,160,255,0.5));border-radius:2px;animation:rainFall linear infinite}
+@keyframes rainFall{0%{transform:translateY(-20px)}100%{transform:translateY(660px)}}
+.shop-sad{display:flex;flex-direction:column;align-items:center;animation:sway 2.5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+.roof-sad{width:160px;height:32px;background:#4a1a00;clip-path:polygon(0 100%,50% 0,100% 100%)}
+.body-sad{width:140px;height:95px;background:#6b2d0a;border-radius:0 0 6px 6px;display:flex;flex-direction:column;align-items:center;padding-top:8px;gap:6px}
+.sign-sad{background:#3d1500;border:1px dashed #666;border-radius:4px;padding:3px 10px;font-family:'Fredoka One';font-size:11px;color:#888}
+.wins-sad{display:flex;gap:8px}
+.win{width:32px;height:32px;background:#0d0400;border:2px solid #4a1a00;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.door-sad{width:28px;height:40px;background:#3d1500;border-radius:4px 4px 0 0}
+.money-fly{position:absolute;top:18%;right:14%;font-size:22px;animation:mFly 2s ease-in infinite}
+@keyframes mFly{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(30px,-50px) rotate(20deg);opacity:0}}
+/* S2 */
+.s2{background:radial-gradient(ellipse at 50% 35%,#0a2a3d 0%,#050f1a 100%)}
+.s2-art{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.phone-f{width:170px;height:310px;background:#0a0a0a;border-radius:28px;border:3px solid #128C7E;box-shadow:0 0 50px rgba(18,140,126,0.5),0 0 100px rgba(18,140,126,0.2);overflow:hidden;position:relative;animation:pFloat 3s ease-in-out infinite}
+@keyframes pFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-12px) rotate(2deg)}}
+.pscreen{position:absolute;inset:6px;background:#128C7E;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.app-icon{font-size:50px;animation:iBounce 1.2s ease-in-out infinite alternate}
+@keyframes iBounce{0%{transform:scale(1)}100%{transform:scale(1.12)}}
+.app-nm{font-family:'Fredoka One';font-size:20px;color:#fff}
+.app-tg{font-size:10px;color:rgba(255,255,255,0.8);text-align:center;padding:0 12px}
+.app-bg{background:rgba(255,255,255,0.2);border-radius:8px;padding:5px 12px;font-size:10px;color:#fff;font-weight:700}
+.spark{position:absolute;font-size:18px;animation:spkPop ease-in-out infinite}
+@keyframes spkPop{0%,100%{transform:scale(1) rotate(0deg);opacity:0.7}50%{transform:scale(1.4) rotate(20deg);opacity:1}}
+/* S3 */
+.s3{background:linear-gradient(160deg,#071a10 0%,#0d2d1a 100%)}
+.s3-art{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.lmock{width:210px;background:#0d1a12;border-radius:20px;overflow:hidden;border:2px solid #128C7E;animation:popIn 0.6s ease-out}
+@keyframes popIn{from{transform:scale(0.8) rotate(-5deg);opacity:0}to{transform:scale(1) rotate(0deg);opacity:1}}
+.lm-h{background:#128C7E;padding:10px 12px;display:flex;align-items:center;gap:8px}
+.lm-b{padding:12px;display:flex;flex-direction:column;gap:8px}
+.lm-photos{display:flex;gap:5px}
+.lm-ph{height:55px;border-radius:8px;flex:1;display:flex;align-items:center;justify-content:center;font-size:22px}
+.lm-fd{background:#0a1510;border-radius:6px;padding:7px 10px;border-left:3px solid #128C7E}
+.lm-fl{font-size:8px;color:#4ECDC4;font-weight:700;text-transform:uppercase;margin-bottom:2px}
+.lm-fv{font-size:11px;color:#fff;font-weight:600}
+.lm-btn{background:#128C7E;border-radius:8px;padding:10px;text-align:center;font-family:'Fredoka One';font-size:14px;color:#fff;animation:bPulse 1.5s ease-in-out infinite}
+@keyframes bPulse{0%,100%{box-shadow:0 0 0 0 rgba(18,140,126,0.5)}50%{box-shadow:0 0 0 10px rgba(18,140,126,0)}}
+.ticks{position:absolute;right:10px;top:25%;display:flex;flex-direction:column;gap:6px}
+.tick{background:rgba(18,140,126,0.95);border-radius:20px;padding:5px 10px;font-size:10px;color:#fff;font-weight:700;white-space:nowrap;animation:tSlide 0.4s ease-out backwards}
+@keyframes tSlide{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+/* S4 */
+.s4{background:linear-gradient(160deg,#050d1a 0%,#0a1a2d 100%)}
+.s4-art{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:0 18px}
+.mapv{width:100%;height:155px;background:#0a1520;border-radius:14px;border:1px solid #1a3050;position:relative;overflow:hidden}
+.mgl{position:absolute;background:rgba(78,205,196,0.08)}
+.spin{font-size:28px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5}
+.pr{position:absolute;top:50%;left:50%;width:60px;height:60px;border:2px solid rgba(18,140,126,0.5);border-radius:50%;transform:translate(-50%,-50%);animation:prExp 2s ease-out infinite}
+@keyframes prExp{0%{transform:translate(-50%,-50%) scale(0.5);opacity:1}100%{transform:translate(-50%,-50%) scale(3);opacity:0}}
+.bdt{position:absolute;font-size:18px}
+.nc{background:rgba(18,140,126,0.15);border:1px solid rgba(18,140,126,0.4);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:10px;width:100%;animation:nPop 0.5s ease-out backwards}
+@keyframes nPop{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.ni{flex:1}
+.nn{font-size:12px;color:#fff;font-weight:700}
+.nd{font-size:10px;color:rgba(255,255,255,0.5)}
+.na{font-size:14px;font-weight:800;color:#2ECC71}
+/* S5 */
+.s5{background:linear-gradient(160deg,#071a10 0%,#0a2d16 100%)}
+.s5-art{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative}
+.csh{position:absolute;top:0;left:0;right:0;height:55%;pointer-events:none;overflow:hidden}
+.cn{position:absolute;font-size:20px;animation:cnFall linear infinite}
+@keyframes cnFall{0%{transform:translateY(-30px) rotate(0deg);opacity:1}100%{transform:translateY(340px) rotate(360deg);opacity:0}}
+.hshop{animation:jBounce 0.7s ease-in-out infinite alternate}
+@keyframes jBounce{0%{transform:translateY(0)}100%{transform:translateY(-8px)}}
+.roof-h{width:170px;height:35px;background:#2ECC71;clip-path:polygon(0 100%,50% 0,100% 100%)}
+.body-h{width:150px;height:100px;background:#27AE60;border-radius:0 0 8px 8px;display:flex;flex-direction:column;align-items:center;padding-top:8px;gap:6px;box-shadow:0 10px 30px rgba(46,204,113,0.4)}
+.sign-h{background:#1a8a45;border:2px solid #fff;border-radius:6px;padding:4px 12px;font-family:'Fredoka One';font-size:12px;color:#fff;animation:sglow 1.2s ease-in-out infinite alternate}
+@keyframes sglow{0%{box-shadow:0 0 5px rgba(255,255,255,0.3)}100%{box-shadow:0 0 20px rgba(255,255,255,0.8)}}
+.wins-h{display:flex;gap:8px}
+.win-h{width:34px;height:34px;background:#0d4a20;border:2px solid #1a8a45;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.door-h{width:30px;height:44px;background:#1a8a45;border-radius:5px 5px 0 0}
+.stats{display:flex;gap:10px}
+.scard{background:rgba(46,204,113,0.15);border:2px solid rgba(46,204,113,0.4);border-radius:14px;padding:12px 16px;text-align:center;animation:sPop 0.5s ease-out backwards}
+@keyframes sPop{from{transform:scale(0)}to{transform:scale(1)}}
+.snum{font-family:'Fredoka One';font-size:26px;color:#2ECC71}
+.slbl{font-size:10px;color:rgba(255,255,255,0.5);margin-top:2px}
+/* S6 */
+.s6{background:linear-gradient(160deg,#128C7E 0%,#0a6b5e 50%,#085048 100%)}
+.s6::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 25%,rgba(255,255,255,0.12) 0%,transparent 65%)}
+.s6-art{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:0 18px 10px;position:relative;z-index:2}
+.cta-logo{font-size:60px;animation:lgPop 0.6s ease-out}
+@keyframes lgPop{0%{transform:scale(0) rotate(-15deg)}80%{transform:scale(1.1) rotate(5deg)}100%{transform:scale(1) rotate(0deg)}}
+.cta-t{font-family:'Fredoka One';font-size:38px;color:#fff;text-shadow:0 4px 15px rgba(0,0,0,0.3);text-align:center;line-height:1}
+.cta-s{font-size:13px;color:rgba(255,255,255,0.85);text-align:center;font-weight:700}
+.cpills{display:flex;flex-direction:column;gap:7px;width:100%}
+.cpill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.15);border-radius:12px;padding:9px 14px;animation:pSlide 0.4s ease-out backwards}
+@keyframes pSlide{from{transform:translateX(-30px);opacity:0}to{transform:translateX(0);opacity:1}}
+.cpill-i{font-size:18px;flex-shrink:0}
+.cpill-t{font-size:12px;color:#fff;font-weight:700}
+.cta-dl{background:#fff;color:#128C7E;border:none;border-radius:14px;padding:14px 0;width:100%;font-family:'Fredoka One';font-size:19px;cursor:pointer;box-shadow:0 8px 25px rgba(0,0,0,0.25);animation:dlPop 0.5s ease-out 1.5s backwards,dlBounce 2s ease-in-out 2s infinite;text-decoration:none;display:block;text-align:center}
+@keyframes dlPop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes dlBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.cta-url{font-size:9px;color:rgba(255,255,255,0.45);text-align:center}
+.cconf{position:absolute;width:7px;height:7px;animation:ccFall linear infinite}
+@keyframes ccFall{0%{transform:translateY(-10px) rotate(0deg);opacity:1}100%{transform:translateY(650px) rotate(540deg);opacity:0}}
+/* Play overlay */
+.play-ov{position:absolute;inset:0;background:rgba(0,0,0,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;border-radius:24px;cursor:pointer}
+.play-big{font-size:80px;animation:ppulse 1.5s ease-in-out infinite}
+@keyframes ppulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.play-h{font-family:'Fredoka One';font-size:26px;color:#fff;margin-top:14px}
+.play-s{font-size:13px;color:rgba(255,255,255,0.6);margin-top:6px;text-align:center;padding:0 30px}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+<div class="play-ov" id="pov" onclick="startAd()">
+  <div class="play-big">▶️</div>
+  <div class="play-h">Tap to Watch</div>
+  <div class="play-s">The story of Mama's Kitchen — and how Spaza Market changed everything</div>
+</div>
+
+<div class="nav-dots" id="navDots">
+  <div class="nav-dot active"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+  <div class="nav-dot"></div>
+</div>
+<button class="skip-btn" onclick="if(started)goToScene(6)">Skip ›</button>
+
+<!-- S1 -->
+<div class="scene s1 active" id="scene1">
+  <div class="s1-art">
+    <div class="rain-wrap" id="rw"></div>
+    <div class="shop-sad">
+      <div class="roof-sad"></div>
+      <div class="body-sad">
+        <div class="sign-sad">MAMA'S KITCHEN</div>
+        <div class="wins-sad"><div class="win">😢</div><div class="win">😢</div></div>
+        <div class="door-sad"></div>
+      </div>
+    </div>
+    <div class="money-fly">💸</div>
+  </div>
+  <div class="narration">
+    <div class="narrator-label"><div class="narrator-dot"></div>The story begins...</div>
+    <div class="narrator-text" id="n1"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb1"></div></div>
+</div>
+
+<!-- S2 -->
+<div class="scene s2" id="scene2">
+  <div class="s2-art">
+    <div class="spark" style="top:10%;left:8%;animation-duration:2.1s">✨</div>
+    <div class="spark" style="top:15%;right:10%;animation-duration:1.8s;animation-delay:0.4s">⭐</div>
+    <div class="spark" style="top:65%;left:6%;animation-duration:2.3s;animation-delay:0.7s">💫</div>
+    <div class="spark" style="top:60%;right:8%;animation-duration:1.9s;animation-delay:0.2s">✦</div>
+    <div class="phone-f">
+      <div class="pscreen">
+        <div class="app-icon">🛒</div>
+        <div class="app-nm">Spaza Market</div>
+        <div class="app-tg">Buy & sell near you</div>
+        <div class="app-bg">✅ 100% FREE</div>
+      </div>
+    </div>
+  </div>
+  <div class="narration">
+    <div class="narrator-label"><div class="narrator-dot"></div>Then one day...</div>
+    <div class="narrator-text" id="n2"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb2"></div></div>
+</div>
+
+<!-- S3 -->
+<div class="scene s3" id="scene3">
+  <div class="s3-art">
+    <div class="lmock">
+      <div class="lm-h"><span style="font-size:16px">🛒</span><span style="font-family:'Fredoka One';font-size:14px;color:#fff;margin-left:6px">Add your listing</span></div>
+      <div class="lm-b">
+        <div class="lm-photos">
+          <div class="lm-ph" style="background:#1a2d1a">🍖</div>
+          <div class="lm-ph" style="background:#2d1a0a">🥘</div>
+          <div class="lm-ph" style="background:#0a1a2d">📸</div>
+        </div>
+        <div class="lm-fd"><div class="lm-fl">Item</div><div class="lm-fv">Pap & Wors — R35</div></div>
+        <div class="lm-fd"><div class="lm-fl">Shop</div><div class="lm-fv">Mama Thandi's Kitchen</div></div>
+        <div class="lm-fd"><div class="lm-fl">Location 📍</div><div class="lm-fv">Zone 3, Kwamashu</div></div>
+        <div class="lm-btn">📤 LIST FOR FREE</div>
+      </div>
+    </div>
+    <div class="ticks">
+      <div class="tick" style="animation-delay:0.5s">📸 Photos added</div>
+      <div class="tick" style="animation-delay:1.0s">📍 Location pinned</div>
+      <div class="tick" style="animation-delay:1.5s">✅ Listed free!</div>
+    </div>
+  </div>
+  <div class="narration">
+    <div class="narrator-label"><div class="narrator-dot"></div>She takes action...</div>
+    <div class="narrator-text" id="n3"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb3"></div></div>
+</div>
+
+<!-- S4 -->
+<div class="scene s4" id="scene4">
+  <div class="s4-art">
+    <div class="mapv">
+      <div class="mgl" style="top:33%;left:0;right:0;height:1px"></div>
+      <div class="mgl" style="top:66%;left:0;right:0;height:1px"></div>
+      <div class="mgl" style="left:33%;top:0;bottom:0;width:1px"></div>
+      <div class="mgl" style="left:66%;top:0;bottom:0;width:1px"></div>
+      <div class="pr"></div>
+      <div class="pr" style="animation-delay:0.7s"></div>
+      <div class="spin">🏪</div>
+      <div class="bdt" style="top:20%;left:15%;animation:bWalk 3s ease-in-out infinite">🚶</div>
+      <div class="bdt" style="top:30%;right:18%;animation:bWalk 3s ease-in-out 0.5s infinite">🚶‍♀️</div>
+      <div class="bdt" style="bottom:20%;left:25%;animation:bWalk 3s ease-in-out 1s infinite">🏃</div>
+    </div>
+    <style>@keyframes bWalk{0%,100%{transform:translate(0,0)}50%{transform:translate(-5px,-5px)}}</style>
+    <div class="nc" style="animation-delay:0.3s"><span style="font-size:22px">💬</span><div class="ni"><div class="nn">Sipho — 400m away</div><div class="nd">"Sawubona, is the pap ready?"</div></div></div>
+    <div class="nc" style="animation-delay:0.8s"><span style="font-size:22px">💬</span><div class="ni"><div class="nn">Nomsa — Zone 2</div><div class="nd">"2 plates please, coming now"</div></div></div>
+    <div class="nc" style="animation-delay:1.3s"><span style="font-size:22px">🔔</span><div class="ni"><div class="nn">3 more buyers today</div><div class="nd">All found you on Spaza Market</div></div><div class="na">+R175</div></div>
+  </div>
+  <div class="narration">
+    <div class="narrator-label"><div class="narrator-dot"></div>Within minutes...</div>
+    <div class="narrator-text" id="n4"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb4"></div></div>
+</div>
+
+<!-- S5 -->
+<div class="scene s5" id="scene5">
+  <div class="s5-art">
+    <div class="csh" id="csh"></div>
+    <div class="hshop">
+      <div class="roof-h"></div>
+      <div class="body-h">
+        <div class="sign-h">MAMA'S KITCHEN ⭐</div>
+        <div class="wins-h"><div class="win-h">😄</div><div class="win-h">😄</div></div>
+        <div class="door-h"></div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="scard" style="animation-delay:0.3s"><div class="snum">47</div><div class="slbl">Buyers this week</div></div>
+      <div class="scard" style="animation-delay:0.6s"><div class="snum">R2.8k</div><div class="slbl">Extra income</div></div>
+    </div>
+  </div>
+  <div class="narration">
+    <div class="narrator-label"><div class="narrator-dot"></div>One month later...</div>
+    <div class="narrator-text" id="n5"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb5"></div></div>
+</div>
+
+<!-- S6 -->
+<div class="scene s6" id="scene6">
+  <div class="s6-art" id="confBox">
+    <div class="cta-logo">🛒</div>
+    <div class="cta-t">Spaza Market</div>
+    <div class="cta-s">Your customers are waiting right now</div>
+    <div class="cpills">
+      <div class="cpill" style="animation-delay:0.2s"><span class="cpill-i">🆓</span><span class="cpill-t">FREE to download and list your items</span></div>
+      <div class="cpill" style="animation-delay:0.5s"><span class="cpill-i">📍</span><span class="cpill-t">Buyers near you find you by location</span></div>
+      <div class="cpill" style="animation-delay:0.8s"><span class="cpill-i">📱</span><span class="cpill-t">No app store — works on any phone</span></div>
+      <div class="cpill" style="animation-delay:1.1s"><span class="cpill-i">💬</span><span class="cpill-t">Customers WhatsApp you directly</span></div>
+    </div>
+    <a class="cta-dl" href="https://eagleelectrical01-blip.github.io/spaza-market" target="_blank">Download FREE — Start Today</a>
+    <div class="cta-url">eagleelectrical01-blip.github.io/spaza-market</div>
+  </div>
+  <div class="narration" style="background:linear-gradient(0deg,rgba(5,50,43,0.95) 0%,rgba(5,50,43,0.7) 80%,transparent 100%)">
+    <div class="narrator-label"><div class="narrator-dot"></div>Your turn now...</div>
+    <div class="narrator-text" id="n6"></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="pb6" style="background:rgba(255,255,255,0.8)"></div></div>
+</div>
+
+</div>
+
+<script>
+const narrs = [
+  "Meet Mama Thandi. She cooks the best pap and wors in Kwamashu. But every day... she waits. The street is empty. Nobody knows she is there. Her money is running out. She is ready to give up.",
+  "Then her neighbour shows her something. An app on her phone. It is called Spaza Market. Free to download. No bank account needed. No app store. Just her phone and what she sells.",
+  "She opens the app. Snaps photos of her food. Types her shop name. Pins her exact location on the map. In under 60 seconds... her listing is live. Buyers nearby can now see her. Find her. And contact her on WhatsApp.",
+  "Her phone starts buzzing. Sipho is 400 metres away and wants two plates. Nomsa from Zone 2 saw the photos and is already walking over. By lunchtime five more customers have found her. All through Spaza Market.",
+  "One month later... the shop looks different. The windows are painted. The sign is bright. Forty seven buyers visited her this week alone. She made two thousand eight hundred rand in extra income. Simply by telling people she exists.",
+  "Mama Thandi's story can be YOUR story. Whether you sell food, clothes, phones, or services — Spaza Market puts you in front of the buyers who are looking for you right now. For free. Start today."
+];
+const durs = [8500, 7500, 9000, 8500, 8500, 0];
+let cur = 1, timer, ptimer, pstart, ttimer, started = false;
+
+function typeWrite(id, text, spd) {
+  clearTimeout(ttimer);
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = '<span class="cursor"></span>';
+  const cur2 = el.querySelector('.cursor');
+  let i = 0;
+  function go() {
+    if (i < text.length) {
+      cur2.insertAdjacentText('beforebegin', text[i]);
+      i++;
+      let d = spd;
+      if ('.!?'.includes(text[i-1])) d = spd * 9;
+      else if (',;:—'.includes(text[i-1])) d = spd * 4;
+      ttimer = setTimeout(go, d);
+    } else { cur2.remove(); }
+  }
+  go();
+}
+
+function makeRain() {
+  const c = document.getElementById('rw');
+  for (let i = 0; i < 35; i++) {
+    const d = document.createElement('div');
+    d.className = 'rdrop';
+    d.style.cssText = `left:${Math.random()*100}%;height:${12+Math.random()*20}px;animation-duration:${0.5+Math.random()*0.6}s;animation-delay:${-Math.random()*2}s`;
+    c.appendChild(d);
+  }
+}
+
+function makeCoins() {
+  const c = document.getElementById('csh');
+  const it = ['💰','💵','🪙','💴'];
+  for (let i = 0; i < 14; i++) {
+    const cn = document.createElement('div');
+    cn.className = 'cn';
+    cn.textContent = it[Math.floor(Math.random()*it.length)];
+    cn.style.cssText = `left:${Math.random()*90}%;animation-duration:${1.5+Math.random()*2}s;animation-delay:${-Math.random()*3}s`;
+    c.appendChild(cn);
+  }
+}
+
+function makeConf() {
+  const c = document.getElementById('confBox');
+  const cols = ['rgba(255,255,255,0.6)','rgba(245,166,35,0.8)','rgba(78,205,196,0.8)','rgba(46,204,113,0.8)'];
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'cconf';
+    p.style.cssText = `left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${2+Math.random()*3}s;animation-delay:${-Math.random()*4}s`;
+    c.appendChild(p);
+  }
+}
+
+function goToScene(n) {
+  clearTimeout(timer); clearTimeout(ttimer); cancelAnimationFrame(ptimer);
+  document.getElementById('scene'+cur).classList.remove('active');
+  document.querySelectorAll('.nav-dot')[cur-1].classList.remove('active');
+  const op = document.getElementById('pb'+cur);
+  if (op) op.style.width = '0%';
+  cur = n;
+  document.getElementById('scene'+cur).classList.add('active');
+  document.querySelectorAll('.nav-dot')[cur-1].classList.add('active');
+  const dur = durs[cur-1];
+  const spd = dur > 0 ? Math.max(28, Math.floor((dur * 0.68) / narrs[cur-1].length)) : 35;
+  if (started) typeWrite('n'+cur, narrs[cur-1], spd);
+  if (dur > 0) {
+    const pb = document.getElementById('pb'+cur);
+    if (pb) {
+      pb.style.width = '0%';
+      pstart = Date.now();
+      function ap() { const p = Math.min(100,((Date.now()-pstart)/dur)*100); pb.style.width=p+'%'; if(p<100) ptimer=requestAnimationFrame(ap); }
+      ptimer = requestAnimationFrame(ap);
+    }
+    timer = setTimeout(() => { if (cur < 6) goToScene(cur+1); }, dur);
+  }
+}
+
+function startAd() {
+  document.getElementById('pov').remove();
+  started = true;
+  makeRain(); makeCoins(); makeConf();
+  goToScene(1);
+}
+
+let tx = 0;
+document.getElementById('stage').addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.getElementById('stage').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (!started || Math.abs(dx) < 40) return;
+  if (dx < 0 && cur < 6) goToScene(cur+1);
+  if (dx > 0 && cur > 1) goToScene(cur-1);
+});
+document.querySelectorAll('.nav-dot').forEach((d,i) => { d.onclick = () => { if(started) goToScene(i+1); }; });
+</script>
+</body>
+</html>
