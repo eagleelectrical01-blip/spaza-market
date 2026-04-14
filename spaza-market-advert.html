@@ -301,7 +301,7 @@ body{font-family:'Nunito',sans-serif;background:#111;display:flex;align-items:ce
 </div>
 
 <!-- Add your music file here — replace 'your-music.mp3' with your file name -->
-<audio id="bg-music" src="" preload="auto"></audio>
+<audio id="bg-music" src="music.mp3" preload="auto"></audio>
 
 <!-- MUSIC INSTRUCTIONS (remove this comment when you add your file):
   1. Download a free MP3 from pixabay.com/music
@@ -432,12 +432,17 @@ function startAd() {
   document.getElementById('pov').remove();
   started = true;
   makeRain(); makeCoins(); makeConf();
-  // Play background music if loaded
+  // Play background music
   const audio = document.getElementById('bg-music');
-  if (audio && audio.src && audio.src !== window.location.href) {
+  if (audio) {
     audio.volume = 0.35;
     audio.loop = true;
-    audio.play().catch(() => {});
+    const playPromise = audio.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(err => {
+        console.log('Audio play failed:', err);
+      });
+    }
   }
   goToScene(1);
 }
