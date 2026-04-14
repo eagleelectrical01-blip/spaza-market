@@ -312,17 +312,29 @@ body{font-family:'Nunito',sans-serif;background:#111;display:flex;align-items:ce
 
 <script>
 const narrs = [
-  "Meet Mama Thandi. She cooks the best pap and wors in Kwamashu. But every day... she waits. The street is empty. Nobody knows she is there. Her money is running out. She is ready to give up.",
+  "Meet Mama Thandi. She cooks the best pap and wors in Kwamashu. Just like thousands of people across South Africa selling food, clothes, phones and more from home. But every day... she waits. The street is empty. Nobody knows she is there.",
   "Then her neighbour shows her something. An app on her phone. It is called Spaza Market. Free to download. No bank account needed. No app store. Just her phone and what she sells.",
   "She opens the app. Snaps photos of her food. Types her shop name. Pins her exact location on the map. In under 60 seconds... her listing is live. Buyers nearby can now see her. Find her. And contact her on WhatsApp.",
   "Her phone starts buzzing. Sipho is 400 metres away and wants two plates. Nomsa from Zone 2 saw the photos and is already walking over. By lunchtime five more customers have found her. All through Spaza Market.",
   "One month later... the shop looks different. The windows are painted. The sign is bright. Forty seven buyers visited her this week alone. She made two thousand eight hundred rand in extra income. Simply by telling people she exists.",
-  "Mama Thandi's story can be YOUR story. Whether you sell food, clothes, phones, or services — Spaza Market puts you in front of the buyers who are looking for you right now. For free. Start today."
+  "Mama Thandi's story can be YOUR story. Food. Clothes. Phones. Furniture. Spaza products. Hair and nails. Car wash. Any service. Anything you sell — Spaza Market puts you in front of buyers near you. Right now. For free. Start today."
 ];
-const durs = [18000, 16000, 19000, 18000, 18000, 0];
+const TYPE_SPEED = 75; // ms per character — adjust this to change speed
+const READ_PAUSE = 3500; // ms to wait after typing before next scene
 let cur = 1, timer, ptimer, pstart, ttimer, started = false;
 
-function typeWrite(id, text, spd) {
+function calcTypingTime(text) {
+  // Calculate total time to type a string including punctuation pauses
+  let total = 0;
+  for (let i = 0; i < text.length; i++) {
+    total += TYPE_SPEED;
+    if ('.!?'.includes(text[i])) total += TYPE_SPEED * 16;
+    else if (',;:—'.includes(text[i])) total += TYPE_SPEED * 8;
+  }
+  return total;
+}
+
+function typeWrite(id, text, onDone) {
   clearTimeout(ttimer);
   const el = document.getElementById(id);
   if (!el) return;
@@ -333,11 +345,15 @@ function typeWrite(id, text, spd) {
     if (i < text.length) {
       cur2.insertAdjacentText('beforebegin', text[i]);
       i++;
-      let d = spd;
-      if ('.!?'.includes(text[i-1])) d = spd * 18;
-      else if (',;:—'.includes(text[i-1])) d = spd * 9;
+      let d = TYPE_SPEED;
+      if ('.!?'.includes(text[i-1])) d = TYPE_SPEED * 16;
+      else if (',;:—'.includes(text[i-1])) d = TYPE_SPEED * 8;
       ttimer = setTimeout(go, d);
-    } else { cur2.remove(); }
+    } else {
+      cur2.remove();
+      // Typing done — wait READ_PAUSE then call onDone
+      if (onDone) ttimer = setTimeout(onDone, READ_PAUSE);
+    }
   }
   go();
 }
@@ -380,22 +396,35 @@ function goToScene(n) {
   document.getElementById('scene'+cur).classList.remove('active');
   document.querySelectorAll('.nav-dot')[cur-1].classList.remove('active');
   const op = document.getElementById('pb'+cur);
-  if (op) op.style.width = '0%';
+  if (op) { op.style.width = '0%'; op.style.transition = 'none'; }
   cur = n;
   document.getElementById('scene'+cur).classList.add('active');
   document.querySelectorAll('.nav-dot')[cur-1].classList.add('active');
-  const dur = durs[cur-1];
-  const spd = dur > 0 ? Math.max(90, Math.floor((dur * 0.45) / narrs[cur-1].length)) : 95;
-  if (started) typeWrite('n'+cur, narrs[cur-1], spd);
-  if (dur > 0) {
+
+  if (cur === 6) return; // CTA scene — no auto-advance
+
+  if (started) {
+    const text = narrs[cur-1];
+    const totalTime = calcTypingTime(text) + READ_PAUSE;
+
+    // Animate progress bar to match exact typing duration
     const pb = document.getElementById('pb'+cur);
     if (pb) {
+      pb.style.transition = 'none';
       pb.style.width = '0%';
       pstart = Date.now();
-      function ap() { const p = Math.min(100,((Date.now()-pstart)/dur)*100); pb.style.width=p+'%'; if(p<100) ptimer=requestAnimationFrame(ap); }
+      function ap() {
+        const p = Math.min(100, ((Date.now()-pstart) / totalTime) * 100);
+        pb.style.width = p + '%';
+        if (p < 100) ptimer = requestAnimationFrame(ap);
+      }
       ptimer = requestAnimationFrame(ap);
     }
-    timer = setTimeout(() => { if (cur < 6) goToScene(cur+1); }, dur);
+
+    // Type the narration — advance scene only when typing is done
+    typeWrite('n'+cur, text, () => {
+      if (cur < 6) goToScene(cur + 1);
+    });
   }
 }
 
