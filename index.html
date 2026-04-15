@@ -42,8 +42,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;min-height:1
 .new-banner{background:var(--green-light);padding:8px 14px;font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:6px;border-bottom:1px solid #b2ddd4}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px 12px}
 .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform 0.1s;position:relative}
-.sold-overlay{position:absolute;inset:0;background:rgba(180,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:4;border-radius:0;pointer-events:none}
-.sold-stamp{font-family:'Segoe UI',sans-serif;font-size:28px;font-weight:900;color:#fff;border:4px solid #fff;padding:4px 14px;border-radius:8px;transform:rotate(-15deg);letter-spacing:2px;text-shadow:0 2px 6px rgba(0,0,0,0.4);opacity:0.95}
 .detail-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#fff;z-index:200;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
 .detail-header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #eee;flex-shrink:0;background:#fff;position:sticky;top:0;z-index:10}
 .detail-back{background:none;border:none;font-size:22px;cursor:pointer;padding:0;color:#128C7E;line-height:1}
@@ -587,12 +585,11 @@ function buildCards(list) {
         <button class="carousel-btn next" onclick="event.stopPropagation();slideCarousel('${safeId}',1)">›</button>
         <div style="position:absolute;inset:0" onclick="event.stopPropagation();openListing('${l.id}')"></div>
         <div class="carousel-dots">${dots}</div>
-        ${l.sold?'<div class="sold-overlay"><div class="sold-stamp">SOLD</div></div>':''}
       </div>`;
     } else if (hasPhoto) {
-      imgHtml = `<div class="card-img-wrap"><img src="${l.photos[0]}" onerror="this.style.display='none'">${l.sold?'<div class="sold-overlay"><div class="sold-stamp">SOLD</div></div>':''}`;
+      imgHtml = `<div class="card-img-wrap"><img src="${l.photos[0]}" onerror="this.style.display='none'">`;
     } else {
-      imgHtml = `<div class="card-img-wrap"><span class="card-emoji">${emojis[l.category]||'📦'}</span>${l.sold?'<div class="sold-overlay"><div class="sold-stamp">SOLD</div></div>':''}`;
+      imgHtml = `<div class="card-img-wrap"><span class="card-emoji">${emojis[l.category]||'📦'}</span>`;
     }
     const closeImgWrap = (hasPhoto && l.photos.length > 1) ? '' : '</div>';
     return `<div class="card${l.boosted?' boosted':''}" onclick="openListing('${l.id}')">
@@ -609,9 +606,10 @@ function buildCards(list) {
       </div>
       <div class="card-foot">
         <span class="pay-pill ${pc}">${pl}</span>
-        <div style="display:flex;gap:4px">
-          ${hasPinnedGPS?`<button class="map-btn" onclick="event.stopPropagation();openMap(${l.lat},${l.lng},'${l.name.replace(/'/g,'').replace(/"/g,'')}')">🗺 Map</button>`:''}
-          <button class="wa-btn" onclick="event.stopPropagation();waContact('${l.phone||''}','${l.name.replace(/'/g,'')}')">${t('whatsapp')}</button>
+        <div style="display:flex;gap:4px;align-items:center">
+          ${l.sold?`<span style="background:#E84C4C;color:#fff;font-size:10px;font-weight:800;padding:4px 8px;border-radius:6px;letter-spacing:0.5px">SOLD</span>`:''}
+          ${!l.sold&&hasPinnedGPS?`<button class="map-btn" onclick="event.stopPropagation();openMap(${l.lat},${l.lng},'${l.name.replace(/'/g,'').replace(/"/g,'')}')">🗺 Map</button>`:''}
+          ${!l.sold?`<button class="wa-btn" onclick="event.stopPropagation();waContact('${l.phone||''}','${l.name.replace(/'/g,'')}')">${t('whatsapp')}</button>`:''}
         </div>
       </div>
     </div>`;
